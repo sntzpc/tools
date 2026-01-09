@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Papan Gambar Digital - Kreativitas Tanpa Batas</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Ctext y='54' x='6' font-size='56'%3E%F0%9F%8E%A8%3C/text%3E%3C/svg%3E" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+    body {
+      background: linear-gradient(135deg, #434343 0%, #000000 100%);
+      color: white;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .drawing-app {
+      width: 100%;
+      max-width: 1400px;
+      background: rgba(30, 30, 30, 0.9);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 40px);
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .drawing-title {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .toolbar {
+      display: flex;
+      padding: 15px 30px;
+      background: #2a2a2a;
+      border-bottom: 1px solid #444;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .tool-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-right: 20px;
+      border-right: 1px solid #444;
+      flex-wrap: wrap;
+    }
+    .tool-group:last-child { border-right: none; }
+
+    .tool-label { font-weight: 600; color: #aaa; font-size: 0.9rem; }
+
+    .tool-btn {
+      width: 50px; height: 50px;
+      border-radius: 10px;
+      background: #3a3a3a;
+      border: 2px solid #444;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .tool-btn:hover { background: #4a4a4a; border-color: #667eea; }
+    .tool-btn.active { background: #667eea; border-color: #667eea; transform: scale(1.05); }
+
+    .color-palette { display: flex; gap: 8px; flex-wrap: wrap; }
+    .color-btn {
+      width: 35px; height: 35px;
+      border-radius: 50%;
+      border: 3px solid #444;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .color-btn:hover { transform: scale(1.1); }
+    .color-btn.active {
+      border-color: white;
+      transform: scale(1.1);
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    .brush-size { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .size-preview {
+      width: 30px; height: 30px;
+      background: white;
+      border-radius: 50%;
+      margin-left: 10px;
+      border: 2px solid rgba(255,255,255,.35);
+    }
+    .size-slider {
+      width: 150px;
+      height: 8px;
+      -webkit-appearance: none;
+      background: #444;
+      border-radius: 4px;
+      outline: none;
+    }
+    .size-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+    }
+
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .tools-panel {
+      width: 300px;
+      background: #2a2a2a;
+      padding: 25px;
+      border-right: 1px solid #444;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      overflow-y: auto;
+    }
+
+    .panel-section {
+      background: #3a3a3a;
+      border-radius: 15px;
+      padding: 20px;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      color: #ddd;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .shape-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .shape-btn {
+      aspect-ratio: 1;
+      background: #4a4a4a;
+      border: 2px solid #555;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .shape-btn:hover { background: #5a5a5a; border-color: #667eea; }
+    .shape-btn.active { background: #667eea; border-color: #667eea; }
+
+    .layer-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .layer-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: #4a4a4a;
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .layer-item.active { background: #667eea; }
+
+    .layer-visibility {
+      width: 20px; height: 20px;
+      border-radius: 5px;
+      background: #5a5a5a;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      user-select: none;
+    }
+    .layer-item.active .layer-visibility { background: #4a4a4a; }
+
+    .add-layer-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 700;
+      margin-top: 10px;
+      user-select: none;
+    }
+
+    .canvas-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #1a1a1a;
+      min-width: 0;
+    }
+
+    .canvas-header {
+      padding: 15px 25px;
+      background: #2a2a2a;
+      border-bottom: 1px solid #444;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .canvas-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .action-btn {
+      padding: 10px 20px;
+      background: #3a3a3a;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      transition: background 0.2s, transform .15s;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .action-btn:hover { background: #4a4a4a; transform: translateY(-1px); }
+    .action-btn:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+
+    .undo-redo { display: flex; gap: 5px; }
+    .undo-redo-btn {
+      width: 45px; height: 45px;
+      background: #3a3a3a;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    .undo-redo-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .drawing-canvas {
+      flex: 1;
+      background: #1a1a1a;
+      cursor: crosshair;
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .canvas-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(100, 100, 100, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(100, 100, 100, 0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+      pointer-events: none;
+      opacity: 1;
+    }
+
+    .canvas-stage {
+      position: absolute;
+      inset: 0;
+      transform-origin: top left;
+    }
+
+    canvas#mainCanvas {
+      position: absolute;
+      left: 0; top: 0;
+      width: 100%;
+      height: 100%;
+      image-rendering: auto;
+    }
+
+    .canvas-placeholder {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #666;
+      font-size: 1.2rem;
+      pointer-events: none;
+    }
+
+    .app-footer {
+      padding: 15px 30px;
+      background: #2a2a2a;
+      border-top: 1px solid #444;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #aaa;
+      font-size: 0.9rem;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .zoom-controls { display: flex; align-items: center; gap: 15px; }
+    .zoom-btn {
+      width: 40px; height: 40px;
+      background: #3a3a3a;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .zoom-level { font-weight: 700; min-width: 60px; text-align: center; }
+
+    .cursor-position {
+      font-family: 'Courier New', monospace;
+      background: #3a3a3a;
+      padding: 8px 15px;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 1200px) {
+      .tools-panel { width: 250px; }
+      .toolbar { padding: 15px; }
+    }
+
+    @media (max-width: 992px) {
+      .app-body { flex-direction: column; }
+      .tools-panel {
+        width: 100%;
+        height: 320px;
+        border-right: none;
+        border-bottom: 1px solid #444;
+      }
+      .canvas-container { height: 500px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="drawing-app">
+    <div class="app-header">
+      <div class="header-left">
+        <h1>🎨 Papan Gambar Digital</h1>
+        <div class="drawing-title" id="docTitle">Untitled.canvas • Belum disimpan</div>
+      </div>
+
+      <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+        <button class="action-btn" id="btnSave" style="background: #27ae60;">💾 Simpan Kanvas</button>
+        <button class="action-btn" id="btnClear" style="background: #e67e22;">🧽 Bersihkan Kanvas</button>
+        <button class="action-btn" id="btnResetApp" style="background: #e74c3c;">🗑️ Reset Aplikasi</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="tool-group" id="toolGroup">
+        <div class="tool-label">Alat:</div>
+        <button class="tool-btn active" data-tool="brush" title="Brush">🖌️</button>
+        <button class="tool-btn" data-tool="eraser" title="Eraser">🧽</button>
+        <button class="tool-btn" data-tool="line" title="Line">📏</button>
+        <button class="tool-btn" data-tool="text" title="Text">🔤</button>
+        <button class="tool-btn" data-tool="fill" title="Fill Layer">🎨</button>
+      </div>
+
+      <div class="tool-group" id="colorGroup">
+        <div class="tool-label">Warna:</div>
+        <div class="color-palette">
+          <div class="color-btn active" data-color="#ff0000" style="background:#ff0000;"></div>
+          <div class="color-btn" data-color="#00ff00" style="background:#00ff00;"></div>
+          <div class="color-btn" data-color="#0000ff" style="background:#0000ff;"></div>
+          <div class="color-btn" data-color="#ffff00" style="background:#ffff00;"></div>
+          <div class="color-btn" data-color="#ff00ff" style="background:#ff00ff;"></div>
+          <div class="color-btn" data-color="#00ffff" style="background:#00ffff;"></div>
+          <div class="color-btn" data-color="#ffffff" style="background:#ffffff;"></div>
+          <div class="color-btn" data-color="#000000" style="background:#000000;"></div>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="tool-label">Ukuran:</div>
+        <div class="brush-size">
+          <span>Small</span>
+          <input id="sizeSlider" type="range" class="size-slider" min="1" max="50" value="10">
+          <span>Large</span>
+          <div class="size-preview" id="sizePreview"></div>
+        </div>
+      </div>
+
+      <div class="tool-group">
+        <div class="undo-redo">
+          <button class="undo-redo-btn" id="btnUndo" title="Undo" disabled>↶</button>
+          <button class="undo-redo-btn" id="btnRedo" title="Redo" disabled>↷</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-body">
+      <div class="tools-panel">
+        <div class="panel-section">
+          <div class="section-title">🔶 Bentuk</div>
+          <div class="shape-options" id="shapeGroup">
+            <button class="shape-btn active" data-shape="rect" title="Rectangle">⬜</button>
+            <button class="shape-btn" data-shape="circle" title="Circle">⬤</button>
+            <button class="shape-btn" data-shape="triangle" title="Triangle (stamp)">△</button>
+            <button class="shape-btn" data-shape="hex" title="Hex (stamp)">⬟</button>
+            <button class="shape-btn" data-shape="star" title="Star (stamp)">☆</button>
+            <button class="shape-btn" data-shape="bubble" title="Bubble (stamp)">💬</button>
+          </div>
+        </div>
+
+        <div class="panel-section">
+          <div class="section-title">📄 Layer</div>
+          <div class="layer-list" id="layerList"></div>
+          <button class="add-layer-btn" id="btnAddLayer">+ Tambah Layer</button>
+        </div>
+
+        <div class="panel-section">
+          <div class="section-title">🎛️ Pengaturan</div>
+          <div style="display:flex; flex-direction:column; gap:15px;">
+            <div>
+              <div style="margin-bottom:8px; color:#ccc;">Opacity Layer Aktif: <strong><span id="opVal">100</span>%</strong></div>
+              <input id="opSlider" type="range" style="width:100%;" min="1" max="100" value="100">
+            </div>
+            <div>
+              <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                <input id="gridToggle" type="checkbox" checked>
+                <span>Tampilkan Grid</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="canvas-container">
+        <div class="canvas-header">
+          <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+            <div style="font-weight:800;">Kanvas Utama</div>
+            <div style="color:#aaa; font-size:0.9rem;" id="canvasMeta">1920 × 1080 px</div>
+          </div>
+
+          <div class="canvas-actions">
+            <button class="action-btn" id="btnExportPNG">📤 Ekspor PNG</button>
+            <button class="action-btn" id="btnExportJPG">📤 Ekspor JPG</button>
+            <button class="action-btn" id="btnExportWEBP">📤 Ekspor WEBP</button>
+            <button class="action-btn" id="btnCopy">📋 Salin</button>
+            <button class="action-btn" id="btnExportProject">📦 Ekspor Project</button>
+            <button class="action-btn" id="btnImportProject">📥 Impor Project</button>
+            <input id="fileImport" type="file" accept="application/json" style="display:none;">
+          </div>
+        </div>
+
+        <div class="drawing-canvas" id="canvasWrap">
+          <div class="canvas-grid" id="gridLayer"></div>
+          <div class="canvas-stage" id="stage">
+            <canvas id="mainCanvas"></canvas>
+          </div>
+
+          <div class="canvas-placeholder" id="placeholder">
+            <div style="font-size:3rem; margin-bottom:20px;">🎨</div>
+            <div>Mulai menggambar dengan memilih alat di toolbar</div>
+            <div style="font-size:0.9rem; margin-top:10px; color:#777;">Klik dan drag di area ini untuk menggambar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-footer">
+      <div class="zoom-controls">
+        <button class="zoom-btn" id="zoomOut">➖</button>
+        <div class="zoom-level" id="zoomLevel">100%</div>
+        <button class="zoom-btn" id="zoomIn">➕</button>
+      </div>
+
+      <div class="cursor-position" id="cursorPos">X: —, Y: —</div>
+
+      <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
+        <div>Status: <span id="statusText" style="color:#27ae60;">Siap</span></div>
+        <div>|</div>
+        <div>Alat: <strong id="toolText">Brush</strong></div>
+        <div>|</div>
+        <div>Warna: <strong id="colorText" style="color:#ff0000;">#FF0000</strong></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ===============================
+  // IndexedDB (project save/load)
+  // ===============================
+  const DB_NAME = 'drawing_board_db_v1';
+  const DB_VER = 1;
+  const STORE = 'kv';
+
+  function idbOpen(){
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, DB_VER);
+      req.onerror = () => reject(req.error);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: 'key' });
+      };
+      req.onsuccess = () => resolve(req.result);
+    });
+  }
+
+  async function idbPut(key, value){
+    const db = await idbOpen();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readwrite');
+      const st = tx.objectStore(STORE);
+      st.put({ key, value, updatedAt: Date.now() });
+      tx.oncomplete = () => { db.close(); resolve(true); };
+      tx.onerror = () => { db.close(); reject(tx.error); };
+      tx.onabort = () => { db.close(); reject(tx.error); };
+    });
+  }
+
+  async function idbGet(key){
+    const db = await idbOpen();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE, 'readonly');
+      const st = tx.objectStore(STORE);
+      const r = st.get(key);
+      r.onsuccess = () => { db.close(); resolve(r.result?.value ?? null); };
+      r.onerror = () => { db.close(); reject(r.error); };
+    });
+  }
+
+  function deleteDatabase(){
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.deleteDatabase(DB_NAME);
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => reject(req.error);
+      req.onblocked = () => resolve(false);
+    });
+  }
+
+  // ===============================
+  // DOM
+  // ===============================
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
+  const dom = {
+    docTitle: $('#docTitle'),
+
+    btnSave: $('#btnSave'),
+    btnClear: $('#btnClear'),
+    btnResetApp: $('#btnResetApp'),
+
+    toolBtns: $$('#toolGroup .tool-btn'),
+    colorBtns: $$('#colorGroup .color-btn'),
+    sizeSlider: $('#sizeSlider'),
+    sizePreview: $('#sizePreview'),
+
+    btnUndo: $('#btnUndo'),
+    btnRedo: $('#btnRedo'),
+
+    shapeBtns: $$('#shapeGroup .shape-btn'),
+
+    layerList: $('#layerList'),
+    btnAddLayer: $('#btnAddLayer'),
+
+    opSlider: $('#opSlider'),
+    opVal: $('#opVal'),
+    gridToggle: $('#gridToggle'),
+    gridLayer: $('#gridLayer'),
+
+    canvasWrap: $('#canvasWrap'),
+    stage: $('#stage'),
+    canvas: $('#mainCanvas'),
+    placeholder: $('#placeholder'),
+    canvasMeta: $('#canvasMeta'),
+
+    btnExportPNG: $('#btnExportPNG'),
+    btnExportJPG: $('#btnExportJPG'),
+    btnExportWEBP: $('#btnExportWEBP'),
+    btnCopy: $('#btnCopy'),
+    btnExportProject: $('#btnExportProject'),
+    btnImportProject: $('#btnImportProject'),
+    fileImport: $('#fileImport'),
+
+    zoomOut: $('#zoomOut'),
+    zoomIn: $('#zoomIn'),
+    zoomLevel: $('#zoomLevel'),
+
+    cursorPos: $('#cursorPos'),
+    statusText: $('#statusText'),
+    toolText: $('#toolText'),
+    colorText: $('#colorText'),
+  };
+
+  // ===============================
+  // Canvas + Layers model
+  // ===============================
+  const State = {
+    width: 1920,
+    height: 1080,
+
+    tool: 'brush',      // brush | eraser | line | text | fill
+    shape: 'rect',      // rect | circle | triangle | hex | star | bubble (used when tool=line? we treat shape tool with Line tool? We'll use shape stamping by holding Shift or using Line tool with selected shape)
+    color: '#ff0000',
+    size: 10,
+    zoom: 1,
+
+    isDown: false,
+    start: {x:0,y:0},
+    last: {x:0,y:0},
+
+    // layers: each layer is an offscreen canvas
+    layers: [],
+    activeLayerId: null,
+
+    // undo/redo as snapshots of composite (project-level)
+    undo: [],
+    redo: [],
+    maxHistory: 30,
+
+    // autosave
+    dirty: false,
+    saveTimer: null,
+
+    lastSavedAt: 0,
+  };
+
+  function setStatus(text, color = '#27ae60'){
+    dom.statusText.textContent = text;
+    dom.statusText.style.color = color;
+  }
+
+  function setDocTitle(text){
+    dom.docTitle.textContent = text;
+  }
+
+  function nowHHMM(){
+    const d = new Date();
+    return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  }
+
+  function activeLayer(){
+    return State.layers.find(l => l.id === State.activeLayerId) || State.layers[0];
+  }
+
+  function createOffscreenLayer(name){
+    const c = document.createElement('canvas');
+    c.width = State.width;
+    c.height = State.height;
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    return {
+      id: 'ly_' + Math.random().toString(16).slice(2) + '_' + Date.now().toString(16),
+      name,
+      visible: true,
+      opacity: 1,
+      canvas: c,
+      ctx
+    };
+  }
+
+  function initCanvasSize(){
+    // render canvas uses same internal resolution for crisp export
+    dom.canvas.width = State.width;
+    dom.canvas.height = State.height;
+    dom.canvasMeta.textContent = `${State.width} × ${State.height} px`;
+  }
+
+  function compositeToMain(){
+    const ctx = dom.canvas.getContext('2d');
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.clearRect(0,0,State.width,State.height);
+
+    // background always transparent; if you want solid bg, fill here.
+    for (const ly of State.layers) {
+      if (!ly.visible) continue;
+      ctx.globalAlpha = ly.opacity;
+      ctx.drawImage(ly.canvas, 0, 0);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function pushHistory(){
+    // snapshot composite as dataURL (fast enough for this size, but keep maxHistory)
+    compositeToMain();
+    const url = dom.canvas.toDataURL('image/png');
+    State.undo.push(url);
+    if (State.undo.length > State.maxHistory) State.undo.shift();
+    State.redo = [];
+    dom.btnUndo.disabled = State.undo.length <= 1; // first snapshot counts
+    dom.btnRedo.disabled = State.redo.length === 0;
+  }
+
+  async function restoreFromDataUrl(url){
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        // restore as one merged layer into active layer (simple, stable)
+        // clear all layers then draw into base
+        for (const ly of State.layers) ly.ctx.clearRect(0,0,State.width,State.height);
+        const base = State.layers[0];
+        base.ctx.globalAlpha = 1;
+        base.ctx.drawImage(img, 0, 0);
+        compositeToMain();
+        resolve(true);
+      };
+      img.src = url;
+    });
+  }
+
+  function markDirty(){
+    State.dirty = true;
+    // hide placeholder
+    dom.placeholder.style.display = 'none';
+
+    // debounce autosave
+    if (State.saveTimer) clearTimeout(State.saveTimer);
+    State.saveTimer = setTimeout(() => {
+      saveToIdb().catch(console.error);
+    }, 1200);
+  }
+
+  // ===============================
+  // Drawing helpers
+  // ===============================
+  function canvasPointFromEvent(e){
+    const rect = dom.canvasWrap.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / State.zoom;
+    const y = (e.clientY - rect.top) / State.zoom;
+
+    // map from displayed pixels to internal canvas coords
+    const sx = x / rect.width  * State.width  * State.zoom; // careful: rect.width is scaled by CSS; we want relative
+    const sy = y / rect.height * State.height * State.zoom;
+
+    // simpler approach: use stage size in CSS equals wrap size. We can compute ratio by using wrap client size:
+    const w = dom.canvasWrap.clientWidth;
+    const h = dom.canvasWrap.clientHeight;
+    const cx = (e.offsetX / w) * State.width;
+    const cy = (e.offsetY / h) * State.height;
+
+    // offsetX already includes zoom because it's based on target element after transform? It can be tricky.
+    // We'll compute using clientX and stage bounds based on stage transform:
+    const stageRect = dom.stage.getBoundingClientRect();
+    const rx = (e.clientX - stageRect.left) / stageRect.width;
+    const ry = (e.clientY - stageRect.top) / stageRect.height;
+    return {
+      x: clamp(rx * State.width, 0, State.width),
+      y: clamp(ry * State.height, 0, State.height),
+    };
+  }
+
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+  function setCtxStyle(ctx){
+    ctx.lineWidth = State.size;
+    ctx.strokeStyle = State.color;
+    ctx.fillStyle = State.color;
+  }
+
+  function drawLine(ctx, x1, y1, x2, y2){
+    ctx.beginPath();
+    ctx.moveTo(x1,y1);
+    ctx.lineTo(x2,y2);
+    ctx.stroke();
+  }
+
+  function drawRect(ctx, x1,y1,x2,y2, fill=false){
+    const x = Math.min(x1,x2), y = Math.min(y1,y2);
+    const w = Math.abs(x2-x1), h = Math.abs(y2-y1);
+    if (fill) ctx.fillRect(x,y,w,h);
+    else ctx.strokeRect(x,y,w,h);
+  }
+
+  function drawCircle(ctx, x1,y1,x2,y2, fill=false){
+    const cx = (x1+x2)/2;
+    const cy = (y1+y2)/2;
+    const rx = Math.abs(x2-x1)/2;
+    const ry = Math.abs(y2-y1)/2;
+    const r = Math.max(2, Math.min(rx, ry));
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI*2);
+    if (fill) ctx.fill();
+    else ctx.stroke();
+  }
+
+  function stampShape(ctx, shape, x, y){
+    // stamp with size relative to brush size
+    const s = Math.max(18, State.size * 4);
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.beginPath();
+
+    if (shape === 'triangle'){
+      ctx.moveTo(0, -s);
+      ctx.lineTo(s, s);
+      ctx.lineTo(-s, s);
+      ctx.closePath();
+      ctx.fill();
+    } else if (shape === 'hex'){
+      for (let i=0;i<6;i++){
+        const a = (Math.PI/3)*i - Math.PI/2;
+        const px = Math.cos(a)*s;
+        const py = Math.sin(a)*s;
+        if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+      }
+      ctx.closePath();
+      ctx.fill();
+    } else if (shape === 'star'){
+      const spikes = 5;
+      const outer = s;
+      const inner = s*0.45;
+      let rot = Math.PI/2 * 3;
+      ctx.moveTo(0, -outer);
+      for (let i=0;i<spikes;i++){
+        ctx.lineTo(Math.cos(rot) * outer, Math.sin(rot) * outer);
+        rot += Math.PI / spikes;
+        ctx.lineTo(Math.cos(rot) * inner, Math.sin(rot) * inner);
+        rot += Math.PI / spikes;
+      }
+      ctx.closePath();
+      ctx.fill();
+    } else if (shape === 'bubble'){
+      // speech bubble
+      const w = s*2.2, h = s*1.5;
+      const r = s*0.35;
+      roundRectPath(ctx, -w/2, -h/2, w, h, r);
+      ctx.fill();
+      // tail
+      ctx.beginPath();
+      ctx.moveTo(w*0.15, h*0.5);
+      ctx.lineTo(w*0.05, h*0.5 + s*0.6);
+      ctx.lineTo(w*0.35, h*0.5);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function roundRectPath(ctx, x, y, w, h, r){
+    r = Math.min(r, w/2, h/2);
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.arcTo(x+w, y, x+w, y+h, r);
+    ctx.arcTo(x+w, y+h, x, y+h, r);
+    ctx.arcTo(x, y+h, x, y, r);
+    ctx.arcTo(x, y, x+w, y, r);
+    ctx.closePath();
+  }
+
+  function applyFillLayer(){
+    const ly = activeLayer();
+    if (!ly) return;
+    ly.ctx.save();
+    ly.ctx.globalCompositeOperation = 'source-over';
+    ly.ctx.fillStyle = State.color;
+    ly.ctx.fillRect(0,0,State.width,State.height);
+    ly.ctx.restore();
+    compositeToMain();
+    markDirty();
+  }
+
+  function drawTextAt(x, y){
+    const txt = prompt('Masukkan teks:', 'Teks');
+    if (txt === null) return;
+    const text = String(txt).trim();
+    if (!text) return;
+
+    const ly = activeLayer();
+    const ctx = ly.ctx;
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = State.color;
+    ctx.font = `${Math.max(14, State.size*2)}px Segoe UI`;
+    ctx.textBaseline = 'top';
+    ctx.fillText(text, x, y);
+    ctx.restore();
+
+    compositeToMain();
+    markDirty();
+    pushHistory();
+  }
+
+  // ===============================
+  // UI: Tools / Colors / Size
+  // ===============================
+  function setTool(tool){
+    State.tool = tool;
+    dom.toolBtns.forEach(b => b.classList.toggle('active', b.dataset.tool === tool));
+    dom.toolText.textContent =
+      tool === 'brush' ? 'Brush' :
+      tool === 'eraser' ? 'Eraser' :
+      tool === 'line' ? 'Line/Shape' :
+      tool === 'text' ? 'Text' :
+      'Fill';
+
+    if (tool === 'fill') dom.canvasWrap.style.cursor = 'cell';
+    else if (tool === 'text') dom.canvasWrap.style.cursor = 'text';
+    else dom.canvasWrap.style.cursor = 'crosshair';
+  }
+
+  function setColor(hex){
+    State.color = hex;
+    dom.colorBtns.forEach(b => b.classList.toggle('active', b.dataset.color === hex));
+    dom.colorText.textContent = hex.toUpperCase();
+    dom.colorText.style.color = hex;
+    dom.sizePreview.style.background = hex;
+  }
+
+  function setSize(n){
+    State.size = n;
+    dom.sizePreview.style.width = Math.max(10, n) + 'px';
+    dom.sizePreview.style.height = Math.max(10, n) + 'px';
+    dom.sizePreview.style.borderRadius = '50%';
+  }
+
+  function setShape(shape){
+    State.shape = shape;
+    dom.shapeBtns.forEach(b => b.classList.toggle('active', b.dataset.shape === shape));
+  }
+
+  function setZoom(z){
+    State.zoom = clamp(z, 0.5, 2.5);
+    dom.stage.style.transform = `scale(${State.zoom})`;
+    dom.zoomLevel.textContent = `${Math.round(State.zoom * 100)}%`;
+  }
+
+  // ===============================
+  // Layers UI
+  // ===============================
+  function renderLayers(){
+    dom.layerList.innerHTML = '';
+    for (const ly of State.layers) {
+      const row = document.createElement('div');
+      row.className = 'layer-item' + (ly.id === State.activeLayerId ? ' active' : '');
+      row.dataset.id = ly.id;
+
+      const eye = document.createElement('div');
+      eye.className = 'layer-visibility';
+      eye.textContent = ly.visible ? '👁️' : '🚫';
+      eye.title = 'Toggle visibility';
+
+      eye.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        ly.visible = !ly.visible;
+        compositeToMain();
+        markDirty();
+        renderLayers();
+      });
+
+      const name = document.createElement('div');
+      name.style.flex = '1';
+      name.textContent = ly.name;
+
+      const badge = document.createElement('div');
+      badge.textContent = '🎨';
+
+      row.appendChild(eye);
+      row.appendChild(name);
+      row.appendChild(badge);
+
+      row.addEventListener('click', () => {
+        State.activeLayerId = ly.id;
+        dom.opSlider.value = String(Math.round(ly.opacity * 100));
+        dom.opVal.textContent = String(Math.round(ly.opacity * 100));
+        renderLayers();
+      });
+
+      dom.layerList.appendChild(row);
+    }
+  }
+
+  function addLayer(){
+    const name = prompt('Nama layer:', `Layer ${State.layers.length + 1}`);
+    if (name === null) return;
+    const ly = createOffscreenLayer(name.trim() || `Layer ${State.layers.length + 1}`);
+    State.layers.unshift(ly); // add on top
+    State.activeLayerId = ly.id;
+    renderLayers();
+    compositeToMain();
+    markDirty();
+    pushHistory();
+  }
+
+  function setActiveLayerOpacity(pct){
+    const ly = activeLayer();
+    if (!ly) return;
+    ly.opacity = clamp(pct/100, 0.01, 1);
+    dom.opVal.textContent = String(pct);
+    compositeToMain();
+    markDirty();
+  }
+
+  // ===============================
+  // Pointer Drawing Logic
+  // ===============================
+  function beginDraw(pt){
+    const ly = activeLayer();
+    if (!ly) return;
+
+    State.isDown = true;
+    State.start = { ...pt };
+    State.last = { ...pt };
+
+    const ctx = ly.ctx;
+    ctx.save();
+
+    if (State.tool === 'eraser') {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.strokeStyle = 'rgba(0,0,0,1)';
+      ctx.lineWidth = State.size * 1.2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+    } else {
+      ctx.globalCompositeOperation = 'source-over';
+      setCtxStyle(ctx);
+    }
+
+    // initial dot for brush/eraser
+    if (State.tool === 'brush' || State.tool === 'eraser') {
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, Math.max(1, State.size/2), 0, Math.PI*2);
+      ctx.fillStyle = (State.tool === 'eraser') ? 'rgba(0,0,0,1)' : State.color;
+      if (State.tool === 'eraser') ctx.fill(); else ctx.fill();
+    }
+
+    ctx.restore();
+    compositeToMain();
+    markDirty();
+  }
+
+  function moveDraw(pt){
+    const ly = activeLayer();
+    if (!ly || !State.isDown) return;
+
+    const ctx = ly.ctx;
+    ctx.save();
+
+    if (State.tool === 'brush') {
+      ctx.globalCompositeOperation = 'source-over';
+      setCtxStyle(ctx);
+      drawLine(ctx, State.last.x, State.last.y, pt.x, pt.y);
+    } else if (State.tool === 'eraser') {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.strokeStyle = 'rgba(0,0,0,1)';
+      ctx.lineWidth = State.size * 1.2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      drawLine(ctx, State.last.x, State.last.y, pt.x, pt.y);
+    } else {
+      // for line/shape we only preview; we won't draw permanently on move here.
+      // We'll just update main composite with preview by drawing to main canvas.
+      compositeToMain();
+      const mctx = dom.canvas.getContext('2d');
+      mctx.save();
+      mctx.globalAlpha = 1;
+      mctx.globalCompositeOperation = 'source-over';
+      mctx.lineWidth = State.size;
+      mctx.strokeStyle = State.color;
+      mctx.fillStyle = State.color;
+      mctx.lineCap = 'round';
+      mctx.lineJoin = 'round';
+
+      const x1 = State.start.x, y1 = State.start.y;
+      const x2 = pt.x, y2 = pt.y;
+
+      if (State.tool === 'line') {
+        // line tool uses shape selection:
+        // rect/circle => draw outline; other => stamp at end when release
+        if (State.shape === 'rect') drawRect(mctx, x1,y1,x2,y2,false);
+        else if (State.shape === 'circle') drawCircle(mctx, x1,y1,x2,y2,false);
+        else drawLine(mctx, x1,y1,x2,y2);
+      }
+
+      mctx.restore();
+    }
+
+    ctx.restore();
+    State.last = { ...pt };
+    if (State.tool === 'brush' || State.tool === 'eraser') {
+      compositeToMain();
+      markDirty();
+    }
+  }
+
+  function endDraw(pt){
+    const ly = activeLayer();
+    if (!ly) { State.isDown = false; return; }
+    if (!State.isDown) return;
+
+    State.isDown = false;
+
+    if (State.tool === 'line') {
+      const ctx = ly.ctx;
+      ctx.save();
+      ctx.globalCompositeOperation = 'source-over';
+      setCtxStyle(ctx);
+
+      const x1 = State.start.x, y1 = State.start.y;
+      const x2 = pt.x, y2 = pt.y;
+
+      if (State.shape === 'rect') drawRect(ctx, x1,y1,x2,y2,false);
+      else if (State.shape === 'circle') drawCircle(ctx, x1,y1,x2,y2,false);
+      else if (State.shape === 'triangle' || State.shape === 'hex' || State.shape === 'star' || State.shape === 'bubble') {
+        // stamp at end point (more user-friendly)
+        stampShape(ctx, State.shape, x2, y2);
+      } else {
+        drawLine(ctx, x1,y1,x2,y2);
+      }
+
+      ctx.restore();
+      compositeToMain();
+      markDirty();
+      pushHistory();
+      return;
+    }
+
+    if (State.tool === 'brush' || State.tool === 'eraser') {
+      compositeToMain();
+      markDirty();
+      pushHistory();
+      return;
+    }
+  }
+
+  // single click actions
+  function handleClick(pt){
+    if (State.tool === 'text') {
+      drawTextAt(pt.x, pt.y);
+    } else if (State.tool === 'fill') {
+      applyFillLayer();
+      pushHistory();
+    }
+  }
+
+  // ===============================
+  // Undo / Redo
+  // ===============================
+  async function undo(){
+    if (State.undo.length <= 1) return;
+    const cur = State.undo.pop();
+    State.redo.push(cur);
+    const prev = State.undo[State.undo.length - 1];
+    await restoreFromDataUrl(prev);
+    markDirty();
+
+    dom.btnUndo.disabled = State.undo.length <= 1;
+    dom.btnRedo.disabled = State.redo.length === 0;
+    setStatus('Undo', '#d69e2e');
+  }
+
+  async function redo(){
+    if (!State.redo.length) return;
+    const next = State.redo.pop();
+    State.undo.push(next);
+    await restoreFromDataUrl(next);
+    markDirty();
+
+    dom.btnUndo.disabled = State.undo.length <= 1;
+    dom.btnRedo.disabled = State.redo.length === 0;
+    setStatus('Redo', '#d69e2e');
+  }
+
+  // ===============================
+  // Save/Load Project
+  // ===============================
+  async function saveToIdb(){
+    if (!State.dirty) return;
+
+    // project payload: layers as PNG dataURL
+    const layers = [];
+    for (const ly of State.layers) {
+      layers.push({
+        id: ly.id,
+        name: ly.name,
+        visible: ly.visible,
+        opacity: ly.opacity,
+        png: ly.canvas.toDataURL('image/png')
+      });
+    }
+
+    const payload = {
+      version: 1,
+      width: State.width,
+      height: State.height,
+      tool: State.tool,
+      shape: State.shape,
+      color: State.color,
+      size: State.size,
+      zoom: State.zoom,
+      layers,
+      savedAt: Date.now()
+    };
+
+    await idbPut('project_main', payload);
+    State.dirty = false;
+    State.lastSavedAt = Date.now();
+    setDocTitle(`Untitled.canvas • Terakhir disimpan: ${nowHHMM()}`);
+    setStatus('Tersimpan', '#27ae60');
+  }
+
+  async function loadFromIdb(){
+    const payload = await idbGet('project_main');
+    if (!payload) return false;
+
+    // apply
+    State.width = payload.width || State.width;
+    State.height = payload.height || State.height;
+    initCanvasSize();
+
+    State.tool = payload.tool || 'brush';
+    State.shape = payload.shape || 'rect';
+    State.color = payload.color || '#ff0000';
+    State.size = payload.size || 10;
+    State.zoom = payload.zoom || 1;
+
+    // rebuild layers
+    State.layers = [];
+    if (Array.isArray(payload.layers) && payload.layers.length) {
+      for (const l of payload.layers) {
+        const ly = createOffscreenLayer(l.name || 'Layer');
+        ly.id = l.id || ly.id;
+        ly.visible = (l.visible !== false);
+        ly.opacity = typeof l.opacity === 'number' ? l.opacity : 1;
+        // restore image
+        await new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            ly.ctx.clearRect(0,0,State.width,State.height);
+            ly.ctx.globalAlpha = 1;
+            ly.ctx.drawImage(img, 0, 0);
+            resolve(true);
+          };
+          img.src = l.png;
+        });
+        State.layers.push(ly);
+      }
+    } else {
+      State.layers = [createOffscreenLayer('Layer 1')];
+    }
+
+    State.activeLayerId = State.layers[0]?.id || null;
+
+    // update UI
+    setTool(State.tool);
+    setShape(State.shape);
+    setColor(State.color);
+    dom.sizeSlider.value = String(State.size);
+    setSize(State.size);
+
+    setZoom(State.zoom);
+    dom.gridToggle.checked = true;
+    dom.gridLayer.style.opacity = '1';
+
+    renderLayers();
+    compositeToMain();
+
+    dom.placeholder.style.display = 'none';
+    const savedAt = payload.savedAt ? new Date(payload.savedAt) : null;
+    setDocTitle(`Untitled.canvas • Terakhir disimpan: ${savedAt ? nowHHMM() : '—'}`);
+
+    // history init
+    State.undo = [dom.canvas.toDataURL('image/png')];
+    State.redo = [];
+    dom.btnUndo.disabled = true;
+    dom.btnRedo.disabled = true;
+
+    setStatus('Project dimuat', '#27ae60');
+    return true;
+  }
+
+  function downloadBlob(blob, filename){
+    const a = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function exportImage(type, quality = 0.92){
+    compositeToMain();
+    const mime = type === 'jpg' ? 'image/jpeg' : type === 'webp' ? 'image/webp' : 'image/png';
+    const ext = type === 'jpg' ? 'jpg' : type === 'webp' ? 'webp' : 'png';
+    const dataUrl = dom.canvas.toDataURL(mime, quality);
+    // convert to blob
+    fetch(dataUrl).then(r => r.blob()).then(blob => {
+      downloadBlob(blob, `drawing_${new Date().toISOString().slice(0,10)}.${ext}`);
+      setStatus(`Ekspor ${ext.toUpperCase()} OK`, '#27ae60');
+    }).catch(err => {
+      console.error(err);
+      setStatus('Gagal export', '#e74c3c');
+    });
+  }
+
+  async function copyToClipboard(){
+    try {
+      compositeToMain();
+      const blob = await new Promise(res => dom.canvas.toBlob(res, 'image/png'));
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      setStatus('Disalin ke clipboard', '#27ae60');
+    } catch (e) {
+      console.error(e);
+      setStatus('Gagal salin (izin/dukungan browser)', '#e74c3c');
+      alert('Gagal menyalin. Coba gunakan Ekspor PNG lalu share file.');
+    }
+  }
+
+  function exportProjectJson(){
+    const build = async () => {
+      const layers = State.layers.map(ly => ({
+        id: ly.id,
+        name: ly.name,
+        visible: ly.visible,
+        opacity: ly.opacity,
+        png: ly.canvas.toDataURL('image/png')
+      }));
+      return {
+        version: 1,
+        width: State.width,
+        height: State.height,
+        tool: State.tool,
+        shape: State.shape,
+        color: State.color,
+        size: State.size,
+        zoom: State.zoom,
+        grid: dom.gridToggle.checked,
+        layers,
+        exportedAt: Date.now()
+      };
+    };
+
+    build().then(obj => {
+      const blob = new Blob([JSON.stringify(obj)], { type: 'application/json' });
+      downloadBlob(blob, `drawing_project_${new Date().toISOString().slice(0,10)}.json`);
+      setStatus('Project diekspor', '#27ae60');
+    }).catch(err => {
+      console.error(err);
+      setStatus('Gagal ekspor project', '#e74c3c');
+    });
+  }
+
+  async function importProjectJson(file){
+    const text = await file.text();
+    const obj = JSON.parse(text);
+
+    // basic validate
+    if (!obj || !obj.width || !obj.height || !Array.isArray(obj.layers)) {
+      alert('File project tidak valid.');
+      return;
+    }
+
+    // apply & save to idb
+    const payload = {
+      version: 1,
+      width: obj.width,
+      height: obj.height,
+      tool: obj.tool || 'brush',
+      shape: obj.shape || 'rect',
+      color: obj.color || '#ff0000',
+      size: obj.size || 10,
+      zoom: obj.zoom || 1,
+      layers: obj.layers,
+      savedAt: Date.now()
+    };
+    await idbPut('project_main', payload);
+    await loadFromIdb();
+    markDirty();
+    pushHistory();
+  }
+
+  // ===============================
+  // Clear / Reset App
+  // ===============================
+  function clearCanvasOnly(){
+    if (!confirm('Bersihkan kanvas? (gambar akan hilang, tapi aplikasi tetap)')) return;
+    for (const ly of State.layers) {
+      ly.ctx.clearRect(0,0,State.width,State.height);
+    }
+    compositeToMain();
+    State.undo = [dom.canvas.toDataURL('image/png')];
+    State.redo = [];
+    dom.btnUndo.disabled = true;
+    dom.btnRedo.disabled = true;
+    dom.placeholder.style.display = 'block';
+    markDirty();
+    setStatus('Kanvas dibersihkan', '#e67e22');
+  }
+
+  async function resetApp(){
+    if (!confirm('Reset aplikasi akan menghapus semua data (IndexedDB) dan kembali seperti awal. Lanjutkan?')) return;
+    const ok = await deleteDatabase();
+    if (!ok) {
+      alert('Database sedang digunakan tab lain. Tutup tab lain lalu coba lagi.');
+      return;
+    }
+    location.reload();
+  }
+
+  // ===============================
+  // Pointer events
+  // ===============================
+  function bindCanvasEvents(){
+    const onDown = (e) => {
+      const pt = canvasPointFromEvent(e);
+      setStatus('Menggambar', '#27ae60');
+
+      if (State.tool === 'text' || State.tool === 'fill') {
+        handleClick(pt);
+        return;
+      }
+
+      beginDraw(pt);
+    };
+
+    const onMove = (e) => {
+      const pt = canvasPointFromEvent(e);
+      dom.cursorPos.textContent = `X: ${Math.round(pt.x)}px, Y: ${Math.round(pt.y)}px`;
+
+      if (State.isDown) moveDraw(pt);
+    };
+
+    const onUp = (e) => {
+      const pt = canvasPointFromEvent(e);
+      if (State.isDown) endDraw(pt);
+      setStatus('Siap', '#27ae60');
+    };
+
+    dom.canvasWrap.addEventListener('pointerdown', (e) => {
+      dom.canvasWrap.setPointerCapture(e.pointerId);
+      onDown(e);
+    });
+    dom.canvasWrap.addEventListener('pointermove', onMove);
+    dom.canvasWrap.addEventListener('pointerup', onUp);
+    dom.canvasWrap.addEventListener('pointercancel', onUp);
+
+    // prevent scrolling while drawing on touch
+    dom.canvasWrap.addEventListener('touchmove', (e) => e.preventDefault(), { passive:false });
+  }
+
+  // ===============================
+  // UI events
+  // ===============================
+  function bindUiEvents(){
+    dom.toolBtns.forEach(btn => btn.addEventListener('click', () => setTool(btn.dataset.tool)));
+    dom.colorBtns.forEach(btn => btn.addEventListener('click', () => setColor(btn.dataset.color)));
+
+    dom.sizeSlider.addEventListener('input', () => setSize(Number(dom.sizeSlider.value)));
+
+    dom.shapeBtns.forEach(btn => btn.addEventListener('click', () => setShape(btn.dataset.shape)));
+
+    dom.btnUndo.addEventListener('click', undo);
+    dom.btnRedo.addEventListener('click', redo);
+
+    dom.btnAddLayer.addEventListener('click', addLayer);
+
+    dom.opSlider.addEventListener('input', () => setActiveLayerOpacity(Number(dom.opSlider.value)));
+
+    dom.gridToggle.addEventListener('change', () => {
+      dom.gridLayer.style.opacity = dom.gridToggle.checked ? '1' : '0';
+      markDirty();
+    });
+
+    dom.zoomIn.addEventListener('click', () => setZoom(State.zoom + 0.1));
+    dom.zoomOut.addEventListener('click', () => setZoom(State.zoom - 0.1));
+
+    dom.btnSave.addEventListener('click', async () => {
+      await saveToIdb();
+    });
+
+    dom.btnClear.addEventListener('click', clearCanvasOnly);
+    dom.btnResetApp.addEventListener('click', resetApp);
+
+    dom.btnExportPNG.addEventListener('click', () => exportImage('png'));
+    dom.btnExportJPG.addEventListener('click', () => exportImage('jpg', 0.92));
+    dom.btnExportWEBP.addEventListener('click', () => exportImage('webp', 0.92));
+
+    dom.btnCopy.addEventListener('click', copyToClipboard);
+
+    dom.btnExportProject.addEventListener('click', exportProjectJson);
+    dom.btnImportProject.addEventListener('click', () => dom.fileImport.click());
+
+    dom.fileImport.addEventListener('change', async () => {
+      const f = dom.fileImport.files?.[0];
+      dom.fileImport.value = '';
+      if (!f) return;
+      try {
+        await importProjectJson(f);
+        setStatus('Project diimpor', '#27ae60');
+      } catch (e) {
+        console.error(e);
+        setStatus('Gagal impor project', '#e74c3c');
+        alert('Gagal impor project: ' + (e?.message || e));
+      }
+    });
+
+    // keyboard shortcuts
+    window.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      const ctrl = e.ctrlKey || e.metaKey;
+
+      if (ctrl && k === 'z') { e.preventDefault(); undo(); }
+      if (ctrl && k === 'y') { e.preventDefault(); redo(); }
+      if (ctrl && k === 's') { e.preventDefault(); saveToIdb(); }
+    });
+  }
+
+  // ===============================
+  // Init
+  // ===============================
+  async function init(){
+    initCanvasSize();
+
+    // default layer
+    State.layers = [createOffscreenLayer('Layer 1')];
+    State.activeLayerId = State.layers[0].id;
+
+    // initial UI
+    setTool('brush');
+    setShape('rect');
+    setColor('#ff0000');
+    setSize(Number(dom.sizeSlider.value));
+    setZoom(1);
+
+    dom.opSlider.value = '100';
+    dom.opVal.textContent = '100';
+
+    renderLayers();
+    compositeToMain();
+
+    // initial history snapshot
+    State.undo = [dom.canvas.toDataURL('image/png')];
+    State.redo = [];
+    dom.btnUndo.disabled = true;
+    dom.btnRedo.disabled = true;
+
+    bindUiEvents();
+    bindCanvasEvents();
+
+    // Try load saved project
+    try {
+      const ok = await loadFromIdb();
+      if (ok) {
+        // set opacity control to active layer
+        const ly = activeLayer();
+        dom.opSlider.value = String(Math.round((ly?.opacity ?? 1) * 100));
+        dom.opVal.textContent = dom.opSlider.value;
+      } else {
+        setDocTitle('Untitled.canvas • Belum disimpan');
+      }
+    } catch (e) {
+      console.error(e);
+      setDocTitle('Untitled.canvas • Belum disimpan');
+    }
+
+    setStatus('Siap', '#27ae60');
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

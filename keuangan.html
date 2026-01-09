@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pencatat Keuangan Pribadi</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Ctext y='54' x='6' font-size='56'%3E%F0%9F%92%B5%3C/text%3E%3C/svg%3E" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: #333;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .finance-app {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+      color: white;
+      padding: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    .header-info h1 { font-size: 2.2rem; margin-bottom: 10px; }
+    .current-balance { font-size: 2.8rem; font-weight: 700; margin-top: 10px; }
+
+    .header-tools{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+      margin-left:auto;
+    }
+    .hdr-pill{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      padding: 10px 12px;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 14px;
+      backdrop-filter: blur(6px);
+    }
+    .hdr-btn{
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.12);
+      color: white;
+      cursor: pointer;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform .15s ease, background .15s ease, opacity .15s ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .hdr-btn:hover{ transform: translateY(-2px); background: rgba(255,255,255,.18); }
+    .hdr-btn:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+
+    .hdr-select{
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.12);
+      color: white;
+      font-weight: 700;
+      outline: none;
+    }
+    .hdr-select option{ color:#333; }
+
+    .stats-cards {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+      background: #f8f9fa;
+      flex-wrap: wrap;
+    }
+
+    .stat-card {
+      flex: 1;
+      min-width: 220px;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .income { border-top: 4px solid #38c172; }
+    .expense { border-top: 4px solid #e3342f; }
+    .savings { border-top: 4px solid #3490dc; }
+
+    .stat-value { font-size: 2rem; font-weight: 700; margin: 10px 0; }
+    .income .stat-value { color: #38c172; }
+    .expense .stat-value { color: #e3342f; }
+    .savings .stat-value { color: #3490dc; }
+
+    .app-body { display: flex; padding: 20px; gap: 20px; flex-wrap: wrap; }
+
+    .transaction-form {
+      flex: 1;
+      min-width: 320px;
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 15px;
+    }
+
+    .form-title {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      color: #4776E6;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #495057; }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #dee2e6;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: border-color 0.3s;
+      outline: none;
+      background: white;
+    }
+    .form-control:focus { border-color: #4776E6; }
+
+    .type-selector { display: flex; gap: 10px; margin-top: 10px; }
+    .type-btn {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #dee2e6;
+      background: white;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      font-weight: 700;
+      transition: all 0.3s;
+      user-select: none;
+    }
+    .type-btn.active {
+      border-color: #4776E6;
+      background: #4776E6;
+      color: white;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+      color: white;
+      border: none;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 800;
+      width: 100%;
+      cursor: pointer;
+      transition: transform 0.2s, opacity .15s;
+      user-select: none;
+    }
+    .submit-btn:hover { transform: translateY(-3px); }
+    .submit-btn:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+
+    .form-mini-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .mini-btn{
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 2px solid #dee2e6;
+      background: white;
+      cursor:pointer;
+      font-weight:700;
+      transition: transform .15s ease, background .15s ease;
+      user-select:none;
+      white-space: nowrap;
+    }
+    .mini-btn:hover{ transform: translateY(-2px); background:#f1f5f9; }
+
+    .transactions { flex: 2; min-width: 360px; }
+
+    .transactions-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .filter-controls { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .filter-btn {
+      padding: 8px 16px;
+      border: 2px solid #dee2e6;
+      background: white;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 700;
+      user-select: none;
+      transition: transform .15s ease, border-color .15s ease;
+    }
+    .filter-btn:hover{ transform: translateY(-1px); border-color:#4776E6; }
+    .filter-btn.active { border-color: #4776E6; color: #4776E6; }
+
+    .transactions-list { max-height: 420px; overflow-y: auto; padding-right: 6px; }
+
+    .transaction-item {
+      display: flex;
+      align-items: center;
+      padding: 16px 18px;
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+      border-left: 5px solid #38c172;
+      gap: 14px;
+    }
+    .transaction-item.expense { border-left-color: #e3342f; }
+
+    .transaction-icon {
+      width: 50px; height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex: 0 0 auto;
+    }
+    .income .transaction-icon { background: rgba(56, 193, 114, 0.1); color: #38c172; }
+    .expense .transaction-icon { background: rgba(227, 52, 47, 0.1); color: #e3342f; }
+
+    .transaction-details { flex: 1; min-width: 0; }
+    .transaction-title { font-weight: 800; margin-bottom: 4px; word-break: break-word; }
+    .transaction-category { color: #6c757d; font-size: 0.9rem; display:flex; gap:10px; flex-wrap:wrap; }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background:#f1f5f9;
+      color:#475569;
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    .transaction-amount { font-size: 1.2rem; font-weight: 900; white-space: nowrap; }
+    .amount-income{ color:#38c172; }
+    .amount-expense{ color:#e3342f; }
+
+    .row-actions{
+      display:flex;
+      gap:8px;
+      flex: 0 0 auto;
+    }
+    .icon-btn{
+      width: 40px; height: 40px;
+      border-radius: 12px;
+      border: none;
+      background:#f7fafc;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size: 1.05rem;
+      transition: transform .15s ease, background .15s ease;
+      user-select:none;
+    }
+    .icon-btn:hover{ transform: translateY(-2px); background:#e2e8f0; }
+
+    .charts-section {
+      padding: 20px;
+      background: #f8f9fa;
+      border-top: 1px solid #dee2e6;
+    }
+
+    .charts-title { font-size: 1.3rem; margin-bottom: 20px; color: #4776E6; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+
+    .charts-container { display: flex; gap: 20px; flex-wrap: wrap; }
+
+    .chart {
+      flex: 1;
+      min-width: 320px;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .chart canvas{ width: 100% !important; height: 240px !important; }
+
+    .empty-state{
+      padding: 18px;
+      border: 2px dashed #dee2e6;
+      border-radius: 14px;
+      color: #6c757d;
+      background:#fbfbfd;
+      text-align:center;
+    }
+
+    @media (max-width: 992px) {
+      .app-body { flex-direction: column; }
+      .charts-container { flex-direction: column; }
+      .transaction-form, .transactions { min-width: 0; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="finance-app">
+    <div class="app-header">
+      <div class="header-info">
+        <h1>💰 Keuangan Saya</h1>
+        <div id="headerSub" style="color: rgba(255,255,255,0.86); font-weight:600;">
+          Ringkasan keuangan bulan ini
+        </div>
+        <div class="current-balance" id="curBalance">Rp 0</div>
+      </div>
+
+      <div class="header-tools">
+        <div class="hdr-pill" title="Periode ringkasan & grafik">
+          <span style="font-weight:800;">Periode</span>
+          <select id="monthSelect" class="hdr-select"></select>
+        </div>
+        <button id="btnExport" class="hdr-btn">⬇️ Export XLSX</button>
+        <button id="btnReset" class="hdr-btn">🧹 Reset</button>
+        <div style="font-size: 3.6rem;">💳</div>
+      </div>
+    </div>
+
+    <div class="stats-cards">
+      <div class="stat-card income">
+        <div>Pemasukan</div>
+        <div class="stat-value" id="sumIncome">Rp 0</div>
+        <div style="color: #6c757d; font-size: 0.9rem;" id="deltaIncome">—</div>
+      </div>
+      <div class="stat-card expense">
+        <div>Pengeluaran</div>
+        <div class="stat-value" id="sumExpense">Rp 0</div>
+        <div style="color: #6c757d; font-size: 0.9rem;" id="deltaExpense">—</div>
+      </div>
+      <div class="stat-card savings">
+        <div>Tabungan (Net)</div>
+        <div class="stat-value" id="sumNet">Rp 0</div>
+        <div style="color: #6c757d; font-size: 0.9rem;" id="deltaNet">—</div>
+      </div>
+    </div>
+
+    <div class="app-body">
+      <div class="transaction-form">
+        <div class="form-title">
+          <span>➕ Tambah Transaksi</span>
+          <div class="form-mini-actions">
+            <button id="btnClearForm" class="mini-btn" title="Kosongkan form">Reset Form</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Deskripsi</label>
+          <input id="fDesc" type="text" class="form-control" placeholder="Misal: Belanja bulanan, Gaji, dll.">
+        </div>
+
+        <div class="form-group">
+          <label>Jumlah</label>
+          <input id="fAmount" type="number" class="form-control" placeholder="Rp 0" min="0" step="1000">
+        </div>
+
+        <div class="form-group">
+          <label>Kategori</label>
+          <select id="fCategory" class="form-control">
+            <option>Makanan & Minuman</option>
+            <option>Transportasi</option>
+            <option>Belanja</option>
+            <option>Hiburan</option>
+            <option>Kesehatan</option>
+            <option>Pendidikan</option>
+            <option>Tabungan</option>
+            <option>Lainnya</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Tipe Transaksi</label>
+          <div class="type-selector">
+            <div id="btnTypeIncome" class="type-btn active" data-type="income">Pemasukan</div>
+            <div id="btnTypeExpense" class="type-btn" data-type="expense">Pengeluaran</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input id="fDate" type="date" class="form-control">
+        </div>
+
+        <button id="btnSave" class="submit-btn">Simpan Transaksi</button>
+      </div>
+
+      <div class="transactions">
+        <div class="transactions-header">
+          <div class="form-title" style="margin:0;">📋 Riwayat Transaksi</div>
+          <div class="filter-controls" id="filterBar">
+            <div class="filter-btn active" data-filter="all">Semua</div>
+            <div class="filter-btn" data-filter="income">Pemasukan</div>
+            <div class="filter-btn" data-filter="expense">Pengeluaran</div>
+          </div>
+        </div>
+
+        <div class="transactions-list" id="txList">
+          <!-- render by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-section">
+      <div class="charts-title">
+        <span>📊 Analisis Keuangan</span>
+        <span style="color:#64748b; font-size:.95rem; font-weight:700;" id="chartHint">—</span>
+      </div>
+
+      <div class="charts-container">
+        <div class="chart">
+          <div style="font-weight: 800; margin-bottom: 15px; color: #495057;">Pengeluaran per Kategori</div>
+          <canvas id="pieExpense"></canvas>
+          <div id="pieEmpty" class="empty-state" style="display:none; margin-top:12px;">
+            Belum ada data pengeluaran pada periode ini.
+          </div>
+        </div>
+
+        <div class="chart">
+          <div style="font-weight: 800; margin-bottom: 15px; color: #495057;">Trend Bulanan (6 bulan)</div>
+          <canvas id="lineTrend"></canvas>
+          <div id="lineEmpty" class="empty-state" style="display:none; margin-top:12px;">
+            Belum ada data untuk menampilkan trend.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart.js via cdnjs :contentReference[oaicite:4]{index=4} -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+
+  <!-- SheetJS Standalone xlsx.full.min.js :contentReference[oaicite:5]{index=5} -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+  <script>
+    (() => {
+      // =========================
+      // IndexedDB
+      // =========================
+      const DB_NAME = 'finance_tracker_db_v1';
+      const DB_VER  = 1;
+      const STORE_TX = 'transactions';
+      const STORE_SETTINGS = 'settings';
+
+      function idbOpen(){
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.open(DB_NAME, DB_VER);
+          req.onerror = () => reject(req.error);
+          req.onupgradeneeded = () => {
+            const db = req.result;
+            if (!db.objectStoreNames.contains(STORE_TX)) {
+              const s = db.createObjectStore(STORE_TX, { keyPath: 'id' });
+              s.createIndex('by_date', 'date', { unique: false });
+              s.createIndex('by_type', 'type', { unique: false });
+              s.createIndex('by_month', 'month', { unique: false }); // YYYY-MM
+              s.createIndex('by_createdAt', 'createdAt', { unique: false });
+            }
+            if (!db.objectStoreNames.contains(STORE_SETTINGS)) {
+              db.createObjectStore(STORE_SETTINGS, { keyPath: 'key' });
+            }
+          };
+          req.onsuccess = () => resolve(req.result);
+        });
+      }
+
+      async function idbTx(store, mode, fn){
+        const db = await idbOpen();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(store, mode);
+          const st = tx.objectStore(store);
+          Promise.resolve(fn(st, tx)).then(res => {
+            tx.oncomplete = () => { db.close(); resolve(res); };
+            tx.onerror = () => { db.close(); reject(tx.error); };
+            tx.onabort = () => { db.close(); reject(tx.error); };
+          }).catch(err => {
+            try { tx.abort(); } catch(e){}
+            db.close();
+            reject(err);
+          });
+        });
+      }
+
+      const idb = {
+        get: (store, key) => idbTx(store,'readonly', st => new Promise((res,rej)=>{ const r=st.get(key); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); })),
+        put: (store, val) => idbTx(store,'readwrite', st => new Promise((res,rej)=>{ const r=st.put(val); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); })),
+        del: (store, key) => idbTx(store,'readwrite', st => new Promise((res,rej)=>{ const r=st.delete(key); r.onsuccess=()=>res(true); r.onerror=()=>rej(r.error); })),
+        all: (store) => idbTx(store,'readonly', st => new Promise((res,rej)=>{ const r=st.getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>rej(r.error); })),
+      };
+
+      function deleteDatabase(){
+        return new Promise((resolve, reject) => {
+          const req = indexedDB.deleteDatabase(DB_NAME); // :contentReference[oaicite:6]{index=6}
+          req.onsuccess = () => resolve(true);
+          req.onerror = () => reject(req.error);
+          req.onblocked = () => resolve(false);
+        });
+      }
+
+      // =========================
+      // Helpers
+      // =========================
+      const $ = (s, r=document) => r.querySelector(s);
+      const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+      const now = () => Date.now();
+      const pad2 = (n) => String(n).padStart(2,'0');
+      const uid = () => `tx_${Math.random().toString(16).slice(2)}_${Date.now().toString(16)}`;
+
+      function toMonthKey(yyyy_mm_dd){
+        // expects "YYYY-MM-DD"
+        return String(yyyy_mm_dd || '').slice(0,7);
+      }
+      function fmtIDR(n){
+        const v = Number(n||0);
+        return new Intl.NumberFormat('id-ID', { style:'currency', currency:'IDR', maximumFractionDigits:0 }).format(v);
+      }
+      function monthLabel(monthKey){
+        // monthKey = YYYY-MM
+        const [y,m] = monthKey.split('-').map(Number);
+        const d = new Date(y, (m||1)-1, 1);
+        return new Intl.DateTimeFormat('id-ID', { month:'long', year:'numeric' }).format(d);
+      }
+      function pctChange(cur, prev){
+        if (prev === 0 && cur === 0) return null;
+        if (prev === 0) return 100;
+        return ((cur - prev) / prev) * 100;
+      }
+      function signPct(p){
+        if (p === null || !Number.isFinite(p)) return '—';
+        const s = p > 0 ? '+' : '';
+        return `${s}${Math.round(p)}% dari bulan lalu`;
+      }
+      function iconForCategory(cat){
+        const c = (cat||'').toLowerCase();
+        if (c.includes('makanan')) return '🍽️';
+        if (c.includes('transport')) return '⛽';
+        if (c.includes('belanja')) return '🛒';
+        if (c.includes('hiburan')) return '🎬';
+        if (c.includes('kesehatan')) return '🩺';
+        if (c.includes('pendidikan')) return '📚';
+        if (c.includes('tabungan')) return '🏦';
+        return '🧾';
+      }
+
+      // =========================
+      // DOM
+      // =========================
+      const dom = {
+        headerSub: $('#headerSub'),
+        curBalance: $('#curBalance'),
+        monthSelect: $('#monthSelect'),
+        btnExport: $('#btnExport'),
+        btnReset: $('#btnReset'),
+
+        sumIncome: $('#sumIncome'),
+        sumExpense: $('#sumExpense'),
+        sumNet: $('#sumNet'),
+        deltaIncome: $('#deltaIncome'),
+        deltaExpense: $('#deltaExpense'),
+        deltaNet: $('#deltaNet'),
+
+        fDesc: $('#fDesc'),
+        fAmount: $('#fAmount'),
+        fCategory: $('#fCategory'),
+        fDate: $('#fDate'),
+        btnTypeIncome: $('#btnTypeIncome'),
+        btnTypeExpense: $('#btnTypeExpense'),
+        btnSave: $('#btnSave'),
+        btnClearForm: $('#btnClearForm'),
+
+        filterBar: $('#filterBar'),
+        txList: $('#txList'),
+
+        chartHint: $('#chartHint'),
+        pieCanvas: $('#pieExpense'),
+        lineCanvas: $('#lineTrend'),
+        pieEmpty: $('#pieEmpty'),
+        lineEmpty: $('#lineEmpty'),
+      };
+
+      // =========================
+      // App State
+      // =========================
+      const State = {
+        txs: [],
+        selectedMonth: null,    // YYYY-MM
+        filter: 'all',          // all | income | expense
+        editId: null,           // if editing transaction
+
+        charts: {
+          pie: null,
+          line: null,
+        }
+      };
+
+      // =========================
+      // Settings
+      // =========================
+      async function loadSettings(){
+        const s = await idb.get(STORE_SETTINGS, 'ui');
+        if (s?.value?.selectedMonth) State.selectedMonth = s.value.selectedMonth;
+        if (s?.value?.filter) State.filter = s.value.filter;
+      }
+      async function saveSettings(){
+        await idb.put(STORE_SETTINGS, { key:'ui', value:{ selectedMonth: State.selectedMonth, filter: State.filter }, updatedAt: now() });
+      }
+
+      // =========================
+      // Data Load
+      // =========================
+      async function loadAllTx(){
+        const txs = await idb.all(STORE_TX);
+        txs.sort((a,b) => (b.date||'').localeCompare(a.date||'') || (b.createdAt||0)-(a.createdAt||0));
+        State.txs = txs;
+      }
+
+      function buildMonthOptions(){
+        // Include months that exist in data + current month
+        const set = new Set(State.txs.map(t => t.month).filter(Boolean));
+        const today = new Date();
+        const curMonth = `${today.getFullYear()}-${pad2(today.getMonth()+1)}`;
+        set.add(curMonth);
+
+        const months = Array.from(set);
+        months.sort((a,b) => b.localeCompare(a));
+
+        dom.monthSelect.innerHTML = '';
+        for (const m of months) {
+          const opt = document.createElement('option');
+          opt.value = m;
+          opt.textContent = monthLabel(m);
+          dom.monthSelect.appendChild(opt);
+        }
+
+        if (!State.selectedMonth) State.selectedMonth = curMonth;
+        // Ensure selectedMonth exists
+        if (!months.includes(State.selectedMonth)) State.selectedMonth = months[0] || curMonth;
+
+        dom.monthSelect.value = State.selectedMonth;
+        dom.headerSub.textContent = `Ringkasan keuangan ${monthLabel(State.selectedMonth)}`;
+      }
+
+      function setFilter(f){
+        State.filter = f;
+        $$('.filter-btn', dom.filterBar).forEach(b => b.classList.toggle('active', b.dataset.filter === f));
+        saveSettings();
+        render();
+      }
+
+      function setType(type){
+        if (type === 'income') {
+          dom.btnTypeIncome.classList.add('active');
+          dom.btnTypeExpense.classList.remove('active');
+        } else {
+          dom.btnTypeExpense.classList.add('active');
+          dom.btnTypeIncome.classList.remove('active');
+        }
+      }
+      function getType(){
+        return dom.btnTypeIncome.classList.contains('active') ? 'income' : 'expense';
+      }
+
+      function clearForm(){
+        State.editId = null;
+        dom.fDesc.value = '';
+        dom.fAmount.value = '';
+        dom.fCategory.value = 'Makanan & Minuman';
+        dom.fDate.value = new Date().toISOString().slice(0,10);
+        setType('income');
+        dom.btnSave.textContent = 'Simpan Transaksi';
+      }
+
+      function txsForSelectedMonth(){
+        const month = State.selectedMonth;
+        const base = State.txs.filter(t => t.month === month);
+
+        if (State.filter === 'income') return base.filter(t => t.type === 'income');
+        if (State.filter === 'expense') return base.filter(t => t.type === 'expense');
+        return base;
+      }
+
+      function monthTotals(monthKey){
+        const rows = State.txs.filter(t => t.month === monthKey);
+        const income = rows.filter(r => r.type === 'income').reduce((a,r)=>a + (r.amount||0), 0);
+        const expense = rows.filter(r => r.type === 'expense').reduce((a,r)=>a + (r.amount||0), 0);
+        const net = income - expense;
+        return { income, expense, net, count: rows.length };
+      }
+
+      function calcBalanceOverall(){
+        const income = State.txs.filter(r=>r.type==='income').reduce((a,r)=>a+(r.amount||0),0);
+        const expense = State.txs.filter(r=>r.type==='expense').reduce((a,r)=>a+(r.amount||0),0);
+        return income - expense;
+      }
+
+      // =========================
+      // Render Transactions List
+      // =========================
+      function renderList(){
+        dom.txList.innerHTML = '';
+        const list = txsForSelectedMonth();
+
+        if (!list.length) {
+          const div = document.createElement('div');
+          div.className = 'empty-state';
+          div.innerHTML = 'Belum ada transaksi pada periode/filter ini.<br><br><strong>Silakan tambah transaksi pertama Anda.</strong>';
+          dom.txList.appendChild(div);
+          return;
+        }
+
+        for (const t of list) {
+          const isIncome = t.type === 'income';
+          const wrap = document.createElement('div');
+          wrap.className = `transaction-item ${isIncome ? 'income' : 'expense'}`;
+
+          const icon = iconForCategory(t.category);
+          const sign = isIncome ? '+' : '-';
+
+          wrap.innerHTML = `
+            <div class="transaction-icon">${isIncome ? '💰' : icon}</div>
+            <div class="transaction-details">
+              <div class="transaction-title"></div>
+              <div class="transaction-category">
+                <span class="pill">📁 ${t.category}</span>
+                <span class="pill">📅 ${t.date}</span>
+              </div>
+            </div>
+            <div class="transaction-amount ${isIncome ? 'amount-income' : 'amount-expense'}">${sign} ${fmtIDR(t.amount)}</div>
+            <div class="row-actions">
+              <button class="icon-btn" title="Edit">✏️</button>
+              <button class="icon-btn" title="Hapus">🗑️</button>
+            </div>
+          `;
+
+          $('.transaction-title', wrap).textContent = t.desc || '(Tanpa deskripsi)';
+
+          const [btnEdit, btnDel] = $$('.icon-btn', wrap);
+
+          btnEdit.addEventListener('click', () => startEdit(t.id));
+          btnDel.addEventListener('click', async () => {
+            if (!confirm('Hapus transaksi ini?')) return;
+            await idb.del(STORE_TX, t.id);
+            await refreshAll();
+          });
+
+          dom.txList.appendChild(wrap);
+        }
+      }
+
+      async function startEdit(id){
+        const t = State.txs.find(x => x.id === id);
+        if (!t) return;
+        State.editId = id;
+
+        dom.fDesc.value = t.desc || '';
+        dom.fAmount.value = String(t.amount || 0);
+        dom.fCategory.value = t.category || 'Lainnya';
+        dom.fDate.value = t.date || new Date().toISOString().slice(0,10);
+        setType(t.type || 'income');
+
+        dom.btnSave.textContent = 'Update Transaksi';
+        dom.fDesc.focus();
+      }
+
+      // =========================
+      // Stats + Deltas
+      // =========================
+      function renderStats(){
+        const month = State.selectedMonth;
+        const tThis = monthTotals(month);
+
+        // previous month
+        const [y, m] = month.split('-').map(Number);
+        const prevDate = new Date(y, (m-1)-1, 1);
+        const prevMonth = `${prevDate.getFullYear()}-${pad2(prevDate.getMonth()+1)}`;
+        const tPrev = monthTotals(prevMonth);
+
+        dom.sumIncome.textContent = fmtIDR(tThis.income);
+        dom.sumExpense.textContent = fmtIDR(tThis.expense);
+        dom.sumNet.textContent = fmtIDR(tThis.net);
+
+        dom.deltaIncome.textContent = signPct(pctChange(tThis.income, tPrev.income));
+        dom.deltaExpense.textContent = signPct(pctChange(tThis.expense, tPrev.expense));
+        dom.deltaNet.textContent = signPct(pctChange(tThis.net, tPrev.net));
+
+        // overall balance
+        dom.curBalance.textContent = fmtIDR(calcBalanceOverall());
+
+        dom.headerSub.textContent = `Ringkasan keuangan ${monthLabel(month)}`;
+        dom.chartHint.textContent = `Periode: ${monthLabel(month)} • Filter: ${State.filter === 'all' ? 'Semua' : (State.filter === 'income' ? 'Pemasukan' : 'Pengeluaran')}`;
+      }
+
+      // =========================
+      // Charts
+      // =========================
+      function ensureCharts(){
+        if (!window.Chart) return;
+
+        // Pie Expense per Category
+        if (!State.charts.pie) {
+          State.charts.pie = new Chart(dom.pieCanvas, {
+            type: 'pie',
+            data: { labels: [], datasets: [{ data: [] }] },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                  callbacks: {
+                    label: (ctx) => {
+                      const v = ctx.parsed || 0;
+                      return `${ctx.label}: ${fmtIDR(v)}`;
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        // Line Trend 6 months (income vs expense)
+        if (!State.charts.line) {
+          State.charts.line = new Chart(dom.lineCanvas, {
+            type: 'line',
+            data: {
+              labels: [],
+              datasets: [
+                { label: 'Pemasukan', data: [], tension: 0.25 },
+                { label: 'Pengeluaran', data: [], tension: 0.25 },
+              ]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                y: {
+                  ticks: {
+                    callback: (v) => {
+                      // short IDR
+                      if (v >= 1e9) return (v/1e9).toFixed(1) + ' M';
+                      if (v >= 1e6) return (v/1e6).toFixed(1) + ' Jt';
+                      if (v >= 1e3) return (v/1e3).toFixed(0) + ' rb';
+                      return v;
+                    }
+                  }
+                }
+              },
+              plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                  callbacks: {
+                    label: (ctx) => `${ctx.dataset.label}: ${fmtIDR(ctx.parsed.y || 0)}`
+                  }
+                }
+              }
+            }
+          });
+        }
+      }
+
+      function updateCharts(){
+        if (!window.Chart) return;
+        ensureCharts();
+
+        // Pie: expense by category in selected month (ignoring filter)
+        const rowsMonth = State.txs.filter(t => t.month === State.selectedMonth);
+        const expenses = rowsMonth.filter(t => t.type === 'expense');
+
+        const byCat = new Map();
+        for (const e of expenses) {
+          byCat.set(e.category, (byCat.get(e.category)||0) + (e.amount||0));
+        }
+
+        const labels = Array.from(byCat.keys());
+        const data = labels.map(k => byCat.get(k));
+
+        const hasPie = data.reduce((a,b)=>a+b,0) > 0;
+        dom.pieEmpty.style.display = hasPie ? 'none' : 'block';
+        dom.pieCanvas.style.display = hasPie ? 'block' : 'none';
+
+        State.charts.pie.data.labels = labels;
+        State.charts.pie.data.datasets[0].data = data;
+        State.charts.pie.update();
+
+        // Line: last 6 months including selected month
+        const [yy, mm] = State.selectedMonth.split('-').map(Number);
+        const months = [];
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(yy, (mm-1) - i, 1);
+          const mk = `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
+          months.push(mk);
+        }
+
+        const lineLabels = months.map(monthLabel);
+        const incomes = months.map(mk => monthTotals(mk).income);
+        const expenses2 = months.map(mk => monthTotals(mk).expense);
+
+        const hasLine = incomes.some(v=>v>0) || expenses2.some(v=>v>0);
+        dom.lineEmpty.style.display = hasLine ? 'none' : 'block';
+        dom.lineCanvas.style.display = hasLine ? 'block' : 'none';
+
+        State.charts.line.data.labels = lineLabels;
+        State.charts.line.data.datasets[0].data = incomes;
+        State.charts.line.data.datasets[1].data = expenses2;
+        State.charts.line.update();
+      }
+
+      // =========================
+      // Save / Update Transaction
+      // =========================
+      async function saveTx(){
+        const desc = dom.fDesc.value.trim();
+        const amount = Number(dom.fAmount.value);
+        const category = dom.fCategory.value;
+        const type = getType();
+        const date = dom.fDate.value;
+
+        if (!date) { alert('Tanggal wajib diisi.'); dom.fDate.focus(); return; }
+        if (!Number.isFinite(amount) || amount <= 0) { alert('Jumlah harus lebih dari 0.'); dom.fAmount.focus(); return; }
+
+        dom.btnSave.disabled = true;
+        try {
+          const month = toMonthKey(date);
+
+          if (State.editId) {
+            const prev = State.txs.find(x => x.id === State.editId);
+            if (!prev) { State.editId = null; }
+            const tx = {
+              ...(prev || {}),
+              id: State.editId || uid(),
+              desc,
+              amount,
+              category,
+              type,
+              date,
+              month,
+              updatedAt: now(),
+              createdAt: prev?.createdAt || now()
+            };
+            await idb.put(STORE_TX, tx);
+          } else {
+            const tx = {
+              id: uid(),
+              desc,
+              amount,
+              category,
+              type,
+              date,
+              month,
+              createdAt: now(),
+              updatedAt: now()
+            };
+            await idb.put(STORE_TX, tx);
+          }
+
+          clearForm();
+          await refreshAll();
+        } catch (e) {
+          console.error(e);
+          alert('Gagal menyimpan: ' + (e?.message || e));
+        } finally {
+          dom.btnSave.disabled = false;
+        }
+      }
+
+      // =========================
+      // Export XLSX
+      // =========================
+      async function exportXlsx(){
+        if (typeof XLSX === 'undefined') {
+          alert('Library XLSX belum termuat. Pastikan internet aktif (SheetJS CDN).');
+          return;
+        }
+
+        dom.btnExport.disabled = true;
+        try {
+          const txs = State.txs.slice().sort((a,b) => (a.date||'').localeCompare(b.date||''));
+
+          const rows = txs.map(t => ({
+            id: t.id,
+            date: t.date,
+            month: t.month,
+            type: t.type,
+            category: t.category,
+            desc: t.desc || '',
+            amount: t.amount,
+          }));
+
+          // Summary per month (pivot simple)
+          const monthSet = Array.from(new Set(txs.map(t => t.month).filter(Boolean))).sort();
+          const summary = monthSet.map(mk => {
+            const tt = monthTotals(mk);
+            return {
+              month: mk,
+              month_label: monthLabel(mk),
+              income: tt.income,
+              expense: tt.expense,
+              net: tt.net,
+              count: tt.count
+            };
+          });
+
+          const wb = XLSX.utils.book_new();
+
+          const ws1 = XLSX.utils.json_to_sheet(rows.length ? rows : [{ info: 'Tidak ada data transaksi' }]);
+          XLSX.utils.book_append_sheet(wb, ws1, 'Transactions');
+
+          const ws2 = XLSX.utils.json_to_sheet(summary.length ? summary : [{ info: 'Tidak ada data ringkasan' }]);
+          XLSX.utils.book_append_sheet(wb, ws2, 'MonthlySummary');
+
+          const fname = `finance_export_${new Date().toISOString().slice(0,10)}.xlsx`;
+          XLSX.writeFile(wb, fname);
+        } catch (e) {
+          console.error(e);
+          alert('Gagal export XLSX: ' + (e?.message || e));
+        } finally {
+          dom.btnExport.disabled = false;
+        }
+      }
+
+      // =========================
+      // Reset App
+      // =========================
+      async function resetApp(){
+        if (!confirm('Reset akan menghapus SEMUA data transaksi. Lanjutkan?')) return;
+
+        try {
+          const ok = await deleteDatabase();
+          if (!ok) {
+            alert('Database sedang digunakan tab lain. Tutup tab lain lalu coba lagi.');
+            return;
+          }
+          location.reload();
+        } catch (e) {
+          console.error(e);
+          alert('Gagal reset: ' + (e?.message || e));
+        }
+      }
+
+      // =========================
+      // Render All
+      // =========================
+      function render(){
+        renderStats();
+        renderList();
+        updateCharts();
+      }
+
+      async function refreshAll(){
+        await loadAllTx();
+        buildMonthOptions();
+        await saveSettings();
+        render();
+      }
+
+      // =========================
+      // Init
+      // =========================
+      function initEvents(){
+        dom.btnTypeIncome.addEventListener('click', () => setType('income'));
+        dom.btnTypeExpense.addEventListener('click', () => setType('expense'));
+
+        dom.btnSave.addEventListener('click', saveTx);
+        dom.fDesc.addEventListener('keydown', (e) => { if (e.key === 'Enter') saveTx(); });
+
+        dom.btnClearForm.addEventListener('click', clearForm);
+
+        $$('.filter-btn', dom.filterBar).forEach(b => b.addEventListener('click', () => setFilter(b.dataset.filter)));
+
+        dom.monthSelect.addEventListener('change', async () => {
+          State.selectedMonth = dom.monthSelect.value;
+          await saveSettings();
+          render();
+        });
+
+        dom.btnExport.addEventListener('click', exportXlsx);
+        dom.btnReset.addEventListener('click', resetApp);
+      }
+
+      async function init(){
+        // init date default
+        dom.fDate.value = new Date().toISOString().slice(0,10);
+
+        await loadSettings();
+        await loadAllTx();
+        buildMonthOptions();
+
+        // apply stored filter UI
+        $$('.filter-btn', dom.filterBar).forEach(b => b.classList.toggle('active', b.dataset.filter === State.filter));
+
+        initEvents();
+        clearForm();
+        await saveSettings();
+        render();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikasi Cuaca Modern (Realtime)</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Ctext y='54' x='6' font-size='56'%3E%26%23x2600%3B%3C/text%3E%3C/svg%3E" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body {
+      background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+      color: #333;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .weather-app {
+      width: 100%;
+      max-width: 1000px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+    }
+    .app-header {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: white;
+      padding: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+    }
+    .location-info h1 { font-size: 2.2rem; margin-bottom: 10px; }
+    .current-date { opacity: 0.9; font-size: 1.1rem; }
+    .search-box { display: flex; gap: 10px; align-items: center; }
+    .search-input {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      width: 250px;
+      font-size: 1rem;
+      outline: none;
+    }
+    .search-btn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s ease, opacity .15s ease;
+    }
+    .search-btn:hover { transform: translateY(-2px); }
+    .search-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background: rgba(255,255,255,0.15);
+      font-size: .9rem;
+      opacity: .95;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+    .status-dot{
+      width:10px; height:10px; border-radius:50%;
+      background:#4CAF50;
+      box-shadow: 0 0 0 3px rgba(76,175,80,.2);
+      flex: 0 0 auto;
+    }
+    .status-dot.loading{ background:#FFD700; box-shadow: 0 0 0 3px rgba(255,215,0,.25); }
+    .status-dot.err{ background:#FF5252; box-shadow: 0 0 0 3px rgba(255,82,82,.2); }
+
+    .current-weather {
+      padding: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+      gap: 30px;
+    }
+    .weather-main { text-align: center; min-width: 220px; }
+    .weather-icon { font-size: 5rem; margin-bottom: 10px; }
+    .temperature { font-size: 4.5rem; font-weight: 300; line-height: 1; }
+    .temperature-unit { font-size: 2rem; vertical-align: top; }
+    .weather-desc { font-size: 1.5rem; color: #666; margin-top: 10px; }
+
+    .weather-details { display: flex; gap: 40px; flex-wrap: wrap; justify-content: flex-end; }
+    .detail-item { text-align: center; min-width: 110px; }
+    .detail-value { font-size: 1.8rem; font-weight: 600; margin-bottom: 5px; }
+    .detail-label { color: #666; font-size: 0.9rem; }
+
+    .forecast-section { padding: 30px; }
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 25px;
+      color: #1e3c72;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hourly-forecast { display: flex; overflow-x: auto; gap: 20px; padding-bottom: 15px; margin-bottom: 30px; }
+    .hour-item {
+      min-width: 100px;
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .hour-item:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+    .hour-time { font-weight: 600; margin-bottom: 10px; color: #1e3c72; }
+    .hour-icon { font-size: 2rem; margin-bottom: 10px; }
+    .hour-temp { font-size: 1.5rem; font-weight: 600; }
+
+    .daily-forecast { display: flex; flex-direction: column; gap: 15px; }
+    .day-item {
+      display: flex;
+      align-items: center;
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .day-item:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+    .day-name { width: 120px; font-weight: 600; color: #1e3c72; }
+    .day-icon { width: 60px; font-size: 2rem; text-align: center; }
+    .day-temp-range { flex: 1; text-align: center; }
+    .temp-bar { height: 8px; background: #e0e0e0; border-radius: 4px; margin: 10px 0; position: relative; overflow: hidden; }
+    .temp-fill {
+      height: 100%;
+      background: linear-gradient(to right, #89f7fe, #66a6ff);
+      border-radius: 4px;
+      width: 50%;
+      transition: width .25s ease;
+    }
+    .temp-min-max { display: flex; justify-content: space-between; font-weight: 600; gap: 10px; }
+    .weather-stats {
+      display: flex;
+      gap: 20px;
+      padding: 30px;
+      background: #f8f9fa;
+      border-top: 1px solid #eee;
+      flex-wrap: wrap;
+    }
+    .stat-card {
+      flex: 1;
+      min-width: 260px;
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    .stat-title { font-size: 1rem; color: #666; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+    .stat-value { font-size: 2rem; font-weight: 600; color: #1e3c72; }
+    .stat-detail { margin-top: 10px; color: #666; font-size: 0.9rem; }
+    .sun-progress { height: 8px; background: #e0e0e0; border-radius: 4px; margin-top: 15px; position: relative; overflow: hidden; }
+    .sun-progress-fill {
+      height: 100%;
+      background: linear-gradient(to right, #FFD700, #FF8C00);
+      border-radius: 4px;
+      width: 0%;
+      transition: width .25s ease;
+    }
+    .sun-marker {
+      position: absolute;
+      top: -5px;
+      width: 18px;
+      height: 18px;
+      background: #FF8C00;
+      border-radius: 50%;
+      transform: translateX(-50%);
+      left: 0%;
+      transition: left .25s ease;
+    }
+
+    .tiny-footnote{
+      padding: 12px 30px 22px;
+      color: rgba(255,255,255,.85);
+      font-size: .85rem;
+      opacity: .9;
+    }
+    .tiny-footnote a{ color: rgba(255,255,255,.95); text-decoration: underline; }
+
+    @media (max-width: 768px) {
+      .app-header { flex-direction: column; gap: 20px; text-align: center; }
+      .search-box { width: 100%; justify-content: center; }
+      .search-input { width: 100%; max-width: 320px; }
+      .current-weather { flex-direction: column; text-align: center; gap: 30px; }
+      .weather-details { justify-content: center; }
+      .hourly-forecast { gap: 10px; }
+      .hour-item { min-width: 80px; padding: 15px 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="weather-app">
+    <div class="app-header">
+      <div class="location-info">
+        <h1 id="locTitle">Memuat lokasi…</h1>
+        <div class="current-date" id="dateLine">—</div>
+        <div class="status-pill" title="Status koneksi & pembaruan data">
+          <span id="statusDot" class="status-dot loading"></span>
+          <span id="statusText">Mengambil lokasi dan cuaca…</span>
+          <span id="lastUpdate" style="opacity:.9;"></span>
+        </div>
+      </div>
+
+      <div class="search-box">
+        <input id="cityInput" type="text" class="search-input" placeholder="Cari kota... (mis: Jakarta)">
+        <button id="searchBtn" class="search-btn" title="Cari">🔍</button>
+      </div>
+    </div>
+
+    <div class="current-weather">
+      <div class="weather-main">
+        <div class="weather-icon" id="curIcon">⛅</div>
+        <div class="temperature"><span id="curTemp">—</span><span class="temperature-unit">°C</span></div>
+        <div class="weather-desc" id="curDesc">—</div>
+      </div>
+
+      <div class="weather-details">
+        <div class="detail-item">
+          <div class="detail-value" id="curHum">—%</div>
+          <div class="detail-label">Kelembapan</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-value" id="curWind">— km/jam</div>
+          <div class="detail-label">Angin</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-value" id="curPres">— hPa</div>
+          <div class="detail-label">Tekanan</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-value" id="curSunrise">—:—</div>
+          <div class="detail-label">Terbit</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-value" id="curSunset">—:—</div>
+          <div class="detail-label">Terbenam</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="forecast-section">
+      <div class="section-title">⏳ Perkiraan Per Jam</div>
+      <div class="hourly-forecast" id="hourlyWrap">
+        <!-- diisi JS -->
+      </div>
+
+      <div class="section-title">📅 Perkiraan 7 Hari</div>
+      <div class="daily-forecast" id="dailyWrap">
+        <!-- diisi JS -->
+      </div>
+    </div>
+
+    <div class="weather-stats">
+      <div class="stat-card">
+        <div class="stat-title">🌡️ Terasa Seperti</div>
+        <div class="stat-value" id="feelLike">—°C</div>
+        <div class="stat-detail" id="feelLikeDetail">—</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-title">👁️ Jarak Pandang</div>
+        <div class="stat-value" id="visibility">— km</div>
+        <div class="stat-detail" id="visibilityDetail">—</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-title">🌅 Durasi Siang</div>
+        <div class="stat-value" id="daylight">— jam</div>
+        <div class="stat-detail" id="sunDetail">—</div>
+        <div class="sun-progress">
+          <div class="sun-progress-fill" id="sunFill"></div>
+          <div class="sun-marker" id="sunMarker"></div>
+        </div>
+        <div class="stat-detail" style="margin-top: 18px;" id="sunPosText">Posisi matahari: —%</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ========= Config (100% online) =========
+  // Weather API: Open-Meteo Forecast (no API key) :contentReference[oaicite:2]{index=2}
+  const WEATHER_ENDPOINT = 'https://api.open-meteo.com/v1/forecast';
+  // Geocoding API: Open-Meteo Geocoding :contentReference[oaicite:3]{index=3}
+  const GEOCODE_ENDPOINT = 'https://geocoding-api.open-meteo.com/v1/search';
+
+  const REFRESH_MINUTES = 10;     // refresh data cuaca
+  const SUN_UPDATE_SECONDS = 30;  // refresh progress matahari
+  const HOURLY_CARDS = 12;        // tampilkan 12 jam ke depan
+
+  // ========= DOM helpers =========
+  const $ = (s, r=document) => r.querySelector(s);
+
+  const dom = {
+    locTitle: $('#locTitle'),
+    dateLine: $('#dateLine'),
+    statusDot: $('#statusDot'),
+    statusText: $('#statusText'),
+    lastUpdate: $('#lastUpdate'),
+
+    cityInput: $('#cityInput'),
+    searchBtn: $('#searchBtn'),
+
+    curIcon: $('#curIcon'),
+    curTemp: $('#curTemp'),
+    curDesc: $('#curDesc'),
+
+    curHum: $('#curHum'),
+    curWind: $('#curWind'),
+    curPres: $('#curPres'),
+    curSunrise: $('#curSunrise'),
+    curSunset: $('#curSunset'),
+
+    hourlyWrap: $('#hourlyWrap'),
+    dailyWrap: $('#dailyWrap'),
+
+    feelLike: $('#feelLike'),
+    feelLikeDetail: $('#feelLikeDetail'),
+    visibility: $('#visibility'),
+    visibilityDetail: $('#visibilityDetail'),
+
+    daylight: $('#daylight'),
+    sunDetail: $('#sunDetail'),
+    sunFill: $('#sunFill'),
+    sunMarker: $('#sunMarker'),
+    sunPosText: $('#sunPosText'),
+  };
+
+  // ========= State =========
+  const State = {
+    lat: null,
+    lon: null,
+    placeLabel: null,
+    timezone: 'auto',
+    daily: null,
+    lastWeather: null,
+    lastFetchAt: 0,
+    timers: { refresh: null, sun: null },
+    aborter: null,
+  };
+
+  // ========= Utils =========
+  function setStatus(kind, text) {
+    dom.statusDot.classList.remove('loading','err');
+    if (kind === 'loading') dom.statusDot.classList.add('loading');
+    if (kind === 'err') dom.statusDot.classList.add('err');
+    dom.statusText.textContent = text || '';
+  }
+
+  function fmtDateLong(d) {
+    return new Intl.DateTimeFormat('id-ID', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    }).format(d);
+  }
+
+  function fmtTimeHHMM(d) {
+    return new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' }).format(d);
+  }
+
+  function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+  function num(x, fallback=null){
+    const n = Number(x);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  function toKm(m) {
+    const km = (m || 0) / 1000;
+    return Math.round(km * 10) / 10; // 1 desimal
+  }
+
+  // WMO Weather Code -> emoji + deskripsi (ringkas)
+  function wmoToUi(code) {
+    const c = Number(code);
+    const map = [
+      { codes: [0], icon: '☀️', desc: 'Cerah' },
+      { codes: [1], icon: '🌤️', desc: 'Cerah Berawan' },
+      { codes: [2], icon: '⛅', desc: 'Berawan Sebagian' },
+      { codes: [3], icon: '☁️', desc: 'Mendung' },
+
+      { codes: [45, 48], icon: '🌫️', desc: 'Berkabut' },
+
+      { codes: [51, 53, 55], icon: '🌦️', desc: 'Gerimis' },
+      { codes: [56, 57], icon: '🌧️', desc: 'Gerimis Beku' },
+
+      { codes: [61, 63, 65], icon: '🌧️', desc: 'Hujan' },
+      { codes: [66, 67], icon: '🌧️', desc: 'Hujan Beku' },
+
+      { codes: [71, 73, 75], icon: '🌨️', desc: 'Salju' },
+      { codes: [77], icon: '❄️', desc: 'Butiran Salju' },
+
+      { codes: [80, 81, 82], icon: '🌧️', desc: 'Hujan Lokal' },
+      { codes: [85, 86], icon: '🌨️', desc: 'Salju Lokal' },
+
+      { codes: [95], icon: '⛈️', desc: 'Badai Petir' },
+      { codes: [96, 99], icon: '⛈️', desc: 'Badai Petir + Hujan Es' },
+    ];
+
+    for (const it of map) if (it.codes.includes(c)) return it;
+    return { icon: '❓', desc: 'Cuaca Tidak Diketahui' };
+  }
+
+  // ========= API helpers =========
+  async function fetchJson(url, { timeoutMs = 12000 } = {}) {
+    if (State.aborter) State.aborter.abort();
+    State.aborter = new AbortController();
+    const t = setTimeout(() => State.aborter.abort(), timeoutMs);
+
+    try {
+      const res = await fetch(url, { signal: State.aborter.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } finally {
+      clearTimeout(t);
+    }
+  }
+
+  async function geocodeCity(name) {
+    const q = encodeURIComponent(name.trim());
+    const url = `${GEOCODE_ENDPOINT}?name=${q}&count=8&language=id&format=json`;
+    const data = await fetchJson(url);
+    const results = Array.isArray(data?.results) ? data.results : [];
+    return results;
+  }
+
+  async function inferNearestLabelFromCoords(lat, lon) {
+    // Trick praktis: pakai geocoding search dengan "lat/lon/radius" tidak resmi,
+    // jadi kita ambil label minimal dengan fallback koordinat.
+    // Karena Open-Meteo geocoding resmi hanya forward search,
+    // kita tetap menampilkan label "Lokasi Anda" bila tidak ada.
+    return `Lokasi Anda (${lat.toFixed(2)}, ${lon.toFixed(2)})`;
+  }
+
+  async function fetchWeather(lat, lon) {
+    // Forecast API parameters :contentReference[oaicite:4]{index=4}
+    const params = new URLSearchParams({
+      latitude: String(lat),
+      longitude: String(lon),
+      timezone: 'auto',
+      temperature_unit: 'celsius',
+      wind_speed_unit: 'kmh',
+
+      current: [
+        'temperature_2m',
+        'relative_humidity_2m',
+        'apparent_temperature',
+        'pressure_msl',
+        'wind_speed_10m',
+        'weather_code',
+        'visibility'
+      ].join(','),
+
+      hourly: [
+        'temperature_2m',
+        'weather_code'
+      ].join(','),
+
+      daily: [
+        'temperature_2m_max',
+        'temperature_2m_min',
+        'weather_code',
+        'sunrise',
+        'sunset'
+      ].join(','),
+
+      forecast_days: '7'
+    });
+
+    const url = `${WEATHER_ENDPOINT}?${params.toString()}`;
+    return await fetchJson(url);
+  }
+
+  // ========= Render =========
+  function renderHeaderLabel(label) {
+    dom.locTitle.textContent = label || '—';
+    dom.dateLine.textContent = fmtDateLong(new Date());
+  }
+
+  function renderCurrent(data) {
+    const cur = data?.current || {};
+    const ui = wmoToUi(cur.weather_code);
+
+    dom.curIcon.textContent = ui.icon;
+    dom.curDesc.textContent = ui.desc;
+
+    const t = num(cur.temperature_2m);
+    dom.curTemp.textContent = (t === null ? '—' : Math.round(t));
+
+    const rh = num(cur.relative_humidity_2m);
+    dom.curHum.textContent = (rh === null ? '—%' : `${Math.round(rh)}%`);
+
+    const wind = num(cur.wind_speed_10m);
+    dom.curWind.textContent = (wind === null ? '— km/jam' : `${Math.round(wind)} km/jam`);
+
+    const pres = num(cur.pressure_msl);
+    dom.curPres.textContent = (pres === null ? '— hPa' : `${Math.round(pres)} hPa`);
+
+    // Stats
+    const feel = num(cur.apparent_temperature);
+    dom.feelLike.textContent = (feel === null ? '—°C' : `${Math.round(feel)}°C`);
+    dom.feelLikeDetail.textContent = (feel === null ? '—' : `Terasa seperti ${Math.round(feel)}°C (dipengaruhi angin & kelembapan).`);
+
+    const vis = num(cur.visibility);
+    const visKm = (vis === null ? null : toKm(vis));
+    dom.visibility.textContent = (visKm === null ? '— km' : `${visKm} km`);
+    dom.visibilityDetail.textContent = (visKm === null ? '—' : `Jarak pandang saat ini sekitar ${visKm} km.`);
+  }
+
+  function clearWrap(el) {
+    while (el.firstChild) el.removeChild(el.firstChild);
+  }
+
+  function renderHourly(data) {
+    clearWrap(dom.hourlyWrap);
+
+    const times = data?.hourly?.time || [];
+    const temps = data?.hourly?.temperature_2m || [];
+    const codes = data?.hourly?.weather_code || [];
+
+    if (!times.length) {
+      const div = document.createElement('div');
+      div.className = 'hour-item';
+      div.innerHTML = `<div class="hour-time">—</div><div class="hour-icon">❗</div><div class="hour-temp">Tidak ada data</div>`;
+      dom.hourlyWrap.appendChild(div);
+      return;
+    }
+
+    const now = new Date();
+    // cari index jam pertama >= sekarang
+    let start = 0;
+    for (let i = 0; i < times.length; i++) {
+      const dt = new Date(times[i]);
+      if (dt >= now) { start = i; break; }
+    }
+
+    for (let k = 0; k < HOURLY_CARDS; k++) {
+      const i = start + k;
+      if (i >= times.length) break;
+
+      const dt = new Date(times[i]);
+      const label = (k === 0) ? 'Sekarang' : fmtTimeHHMM(dt);
+      const t = temps[i];
+      const ui = wmoToUi(codes[i]);
+
+      const card = document.createElement('div');
+      card.className = 'hour-item';
+      card.innerHTML = `
+        <div class="hour-time">${label}</div>
+        <div class="hour-icon">${ui.icon}</div>
+        <div class="hour-temp">${Math.round(t)}°</div>
+      `;
+      dom.hourlyWrap.appendChild(card);
+    }
+  }
+
+  function dayNameId(dt, idx) {
+    if (idx === 0) return 'Hari Ini';
+    return new Intl.DateTimeFormat('id-ID', { weekday: 'long' }).format(dt);
+  }
+
+  function renderDaily(data) {
+    clearWrap(dom.dailyWrap);
+
+    const times = data?.daily?.time || [];
+    const tmax = data?.daily?.temperature_2m_max || [];
+    const tmin = data?.daily?.temperature_2m_min || [];
+    const codes = data?.daily?.weather_code || [];
+
+    if (!times.length) {
+      const div = document.createElement('div');
+      div.className = 'day-item';
+      div.innerHTML = `<div class="day-name">—</div><div class="day-icon">❗</div><div class="day-temp-range">Tidak ada data</div>`;
+      dom.dailyWrap.appendChild(div);
+      return;
+    }
+
+    // untuk lebar bar: bandingkan rentang harian terhadap rentang minggu ini
+    const globalMin = Math.min(...tmin.map(x => Number(x)));
+    const globalMax = Math.max(...tmax.map(x => Number(x)));
+    const range = Math.max(1, globalMax - globalMin);
+
+    for (let i = 0; i < times.length; i++) {
+      const dt = new Date(times[i]);
+      const name = dayNameId(dt, i);
+      const ui = wmoToUi(codes[i]);
+
+      const width = clamp(((tmax[i] - tmin[i]) / range) * 100, 20, 95);
+
+      const row = document.createElement('div');
+      row.className = 'day-item';
+      row.innerHTML = `
+        <div class="day-name">${name}</div>
+        <div class="day-icon">${ui.icon}</div>
+        <div class="day-temp-range">
+          <div class="temp-bar">
+            <div class="temp-fill" style="width:${width.toFixed(0)}%"></div>
+          </div>
+          <div class="temp-min-max">
+            <span>${Math.round(tmin[i])}°</span>
+            <span>${Math.round(tmax[i])}°</span>
+          </div>
+        </div>
+      `;
+      dom.dailyWrap.appendChild(row);
+    }
+  }
+
+  function renderSun(data) {
+    const sunriseArr = data?.daily?.sunrise || [];
+    const sunsetArr  = data?.daily?.sunset  || [];
+    if (!sunriseArr.length || !sunsetArr.length) return;
+
+    const sunrise = new Date(sunriseArr[0]);
+    const sunset  = new Date(sunsetArr[0]);
+
+    dom.curSunrise.textContent = fmtTimeHHMM(sunrise);
+    dom.curSunset.textContent  = fmtTimeHHMM(sunset);
+
+    const now = new Date();
+    const total = sunset - sunrise;
+    const elapsed = now - sunrise;
+    const pct = (total > 0) ? clamp(elapsed / total, 0, 1) : 0;
+
+    const daylightHours = (total > 0) ? (total / 3600000) : null;
+    dom.daylight.textContent = daylightHours ? `${(Math.round(daylightHours*10)/10)} jam` : '— jam';
+
+    const pct100 = Math.round(pct * 100);
+    dom.sunFill.style.width = `${pct100}%`;
+    dom.sunMarker.style.left = `${pct100}%`;
+
+    dom.sunPosText.textContent = `Posisi matahari: ${pct100}%`;
+    dom.sunDetail.textContent = `Terbit ${fmtTimeHHMM(sunrise)} • Terbenam ${fmtTimeHHMM(sunset)}`;
+  }
+
+  function renderAll(data) {
+    State.lastWeather = data;
+    renderCurrent(data);
+    renderHourly(data);
+    renderDaily(data);
+    renderSun(data);
+
+    dom.lastUpdate.textContent = `• Update: ${fmtTimeHHMM(new Date())}`;
+  }
+
+  // ========= Actions =========
+  async function loadByCoords(lat, lon, labelHint=null) {
+    State.lat = lat;
+    State.lon = lon;
+
+    setStatus('loading', 'Mengambil data cuaca realtime…');
+    dom.searchBtn.disabled = true;
+
+    try {
+      const label = labelHint || State.placeLabel || await inferNearestLabelFromCoords(lat, lon);
+      renderHeaderLabel(label);
+
+      const data = await fetchWeather(lat, lon);
+      renderAll(data);
+
+      setStatus('ok', 'Realtime OK');
+      State.lastFetchAt = Date.now();
+    } catch (e) {
+      console.error(e);
+      setStatus('err', `Gagal memuat data (${e?.message || 'error'}). Coba lagi.`);
+    } finally {
+      dom.searchBtn.disabled = false;
+    }
+  }
+
+  async function loadByCityName(name) {
+    const q = (name || '').trim();
+    if (!q) return;
+
+    setStatus('loading', 'Mencari kota…');
+    dom.searchBtn.disabled = true;
+
+    try {
+      const results = await geocodeCity(q);
+      if (!results.length) throw new Error('Kota tidak ditemukan.');
+
+      // pilih hasil teratas
+      const best = results[0];
+      const lat = best.latitude;
+      const lon = best.longitude;
+      const label = `${best.name}${best.admin1 ? ', ' + best.admin1 : ''}${best.country ? ', ' + best.country : ''}`;
+
+      State.placeLabel = label;
+      await loadByCoords(lat, lon, label);
+    } catch (e) {
+      console.error(e);
+      setStatus('err', `Gagal mencari kota (${e?.message || 'error'}).`);
+      dom.searchBtn.disabled = false;
+    }
+  }
+
+  function scheduleTimers() {
+    // refresh weather
+    if (State.timers.refresh) clearInterval(State.timers.refresh);
+    State.timers.refresh = setInterval(() => {
+      if (State.lat != null && State.lon != null) loadByCoords(State.lat, State.lon, State.placeLabel);
+    }, REFRESH_MINUTES * 60 * 1000);
+
+    // update sun progress more often (tanpa fetch)
+    if (State.timers.sun) clearInterval(State.timers.sun);
+    State.timers.sun = setInterval(() => {
+      if (State.lastWeather) renderSun(State.lastWeather);
+      dom.dateLine.textContent = fmtDateLong(new Date());
+    }, SUN_UPDATE_SECONDS * 1000);
+  }
+
+  async function init() {
+    dom.dateLine.textContent = fmtDateLong(new Date());
+
+    dom.searchBtn.addEventListener('click', () => loadByCityName(dom.cityInput.value));
+    dom.cityInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') loadByCityName(dom.cityInput.value);
+    });
+
+    scheduleTimers();
+
+    // Geolocation
+    setStatus('loading', 'Meminta izin lokasi…');
+    if (!navigator.geolocation) {
+      setStatus('err', 'Browser tidak mendukung geolokasi. Gunakan fitur cari kota.');
+      renderHeaderLabel('Cari kota untuk mulai');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        State.placeLabel = 'Lokasi Anda';
+        await loadByCoords(lat, lon, 'Lokasi Anda');
+      },
+      (err) => {
+        console.warn(err);
+        setStatus('err', 'Izin lokasi ditolak. Silakan cari kota.');
+        renderHeaderLabel('Cari kota untuk mulai');
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+    );
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

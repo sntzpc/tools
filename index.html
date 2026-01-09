@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard Aplikasi</title>
+  <meta name="theme-color" content="#0b1220" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Ctext y='54' x='10' font-size='44'%3E🧭%3C/text%3E%3C/svg%3E" />
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand__logo">🧭</div>
+      <div class="brand__text">
+        <div class="brand__title">Dashboard</div>
+        <div class="brand__sub" id="subInfo">Memuat…</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn ghost" id="btnScan" title="Scan folder aplikasi (Chrome/Edge)">
+        <span class="ico">📁</span><span class="hide-sm">Scan Folder</span>
+      </button>
+      <button class="btn ghost" id="btnImport" title="Import file .html sebagai aplikasi">
+        <span class="ico">➕</span><span class="hide-sm">Tambah</span>
+      </button>
+      <button class="btn ghost" id="btnEdit" title="Mode edit (hapus/urutkan)">
+        <span class="ico">🛠️</span><span class="hide-sm">Edit</span>
+      </button>
+      <button class="btn danger" id="btnReset" title="Reset dashboard (hapus data dashboard saja)">
+        <span class="ico">🧹</span><span class="hide-sm">Reset</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="searchbar">
+      <span class="searchbar__ico">🔎</span>
+      <input id="q" type="search" placeholder="Cari aplikasi… (mis. keuangan / paint)" autocomplete="off"/>
+      <span class="pill" id="countPill">0</span>
+    </div>
+
+    <section id="grid" class="grid" aria-label="Daftar aplikasi"></section>
+
+    <section class="help">
+      <details>
+        <summary>Catatan</summary>
+        <ul>
+          <li>Dashboard ini membaca ikon dari <code>&lt;link rel="icon" href="..."&gt;</code> pada file HTML aplikasi.</li>
+          <li>Nama aplikasi dibuat otomatis dari nama file (tanpa ekstensi), contoh: <code>keuangan.html → keuangan</code>.</li>
+          <li>Untuk benar-benar “otomatis” mendeteksi file baru di folder tanpa edit kode:
+            gunakan tombol <b>Scan Folder</b> sekali (Chrome/Edge), lalu dashboard akan mengingat folder tersebut
+            dan mencoba scan otomatis setiap dibuka.</li>
+        </ul>
+      </details>
+    </section>
+  </main>
+
+  <!-- modal kecil -->
+  <div class="modal hidden" id="modal">
+    <div class="modal__card">
+      <div class="modal__title" id="modalTitle">Modal</div>
+      <div class="modal__body" id="modalBody"></div>
+      <div class="modal__actions">
+        <button class="btn ghost" id="modalCancel">Batal</button>
+        <button class="btn" id="modalOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <input id="filePicker" type="file" accept=".html,text/html" class="hidden" />
+
+  <script src="dashboard.js"></script>
+</body>
+</html>
