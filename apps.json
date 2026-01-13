@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-01-13T04:45:05.427Z",
+  "generated_at": "2026-01-13T04:50:46.812Z",
   "apps": [
     {
       "file": "cuaca.html"
@@ -22,9 +22,6 @@
     },
     {
       "file": "todolist.html"
-    },
-    {
-      "file": "gasing.html"
     }
   ]
 }
