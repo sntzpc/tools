@@ -6,9 +6,68 @@
   const STORE_APPS = 'apps';
   const STORE_META = 'meta';
 
-  // file html yang dibundel bersama dashboard (di folder yang sama)
-  // Ini hanya untuk bootstrap awal. Setelah itu data disimpan di IndexedDB.
-  const DEFAULT_FILES = ["cuaca.html", "kalbmi.html", "keuangan.html", "paint.html", "todolist.html"];
+    /* -----------------------------
+     ✅ apps.json Manifest (rapi)
+  ----------------------------- */
+  const MANIFEST_URL = 'apps.json';
+
+  async function loadAppsManifest(){
+    try{
+      const res = await fetch(MANIFEST_URL, { cache:'no-cache' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+
+      const list = Array.isArray(json?.apps) ? json.apps : [];
+      const files = list
+        .map(x => (typeof x === 'string' ? x : x?.file))
+        .filter(Boolean)
+        .map(s => String(s).trim())
+        .filter(s => /\.html?$/i.test(s))
+        .filter(s => !/^index\.html$/i.test(s))
+        .filter(s => !/^dashboard\.html$/i.test(s))
+        .filter(s => !/^dashboard\./i.test(s));
+
+      return [...new Set(files)];
+    }catch(e){
+      console.warn('apps.json tidak bisa dibaca:', e);
+      return [];
+    }
+  }
+
+  async function syncAppsFromManifest(db){
+    const current = await idbListApps(db);
+    const files = await loadAppsManifest();
+
+    let added = 0, updated = 0, skipped = 0;
+
+    for (const fn of files){
+      try{
+        const res = await fetch(fn, { cache:'no-cache' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const html = await res.text();
+
+        const prev = current.find(a => a.filename === fn);
+        if (!prev){
+          await upsertAppFromHtml({ db, htmlText: html, filename: fn, source:'bundled' });
+          added++;
+        }else{
+          await upsertAppFromHtml({
+            db,
+            htmlText: html,
+            filename: fn,
+            source: prev.source || 'bundled',
+            handle: prev.handle || null
+          });
+          updated++;
+        }
+      }catch(err){
+        console.warn('Gagal load file dari apps.json:', fn, err);
+        skipped++;
+      }
+    }
+
+    return { added, updated, skipped, total: files.length };
+  }
 
   const State = {
     editing: false,
@@ -160,24 +219,6 @@
     return rec;
   }
 
-  async function bootstrapBundledApps(db){
-    const current = await idbListApps(db);
-    if (current.length) return { added: 0, skipped: current.length };
-
-    let added = 0;
-    for (const fn of DEFAULT_FILES){
-      try{
-        const res = await fetch(fn, { cache:'no-cache' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const html = await res.text();
-        await upsertAppFromHtml({ db, htmlText: html, filename: fn, source:'bundled' });
-        added++;
-      }catch(err){
-        console.warn('Gagal load bundled file:', fn, err);
-      }
-    }
-    return { added, skipped: 0 };
-  }
 
   /* -----------------------------
      Folder scanning (Chrome/Edge)
@@ -515,7 +556,7 @@
     }catch(e){}
 
     const db = await idbOpen();
-    const boot = await bootstrapBundledApps(db);
+    const boot = await syncAppsFromManifest(db);
 
     State.apps = await idbListApps(db);
 
@@ -535,6 +576,9 @@
     });
 
     $('#subInfo').textContent = `${State.apps.length} aplikasi`;
+    if (boot?.added || boot?.updated){
+      showToast(`Sync apps.json: +${boot.added}, update ${boot.updated}`);
+    }
     render();
 
     // auto scan folder if user already picked one

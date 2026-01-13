@@ -1,0 +1,62 @@
+name: Generate apps.json
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate apps.json from root HTML files
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          // scan root repo (.) hanya file .html / .htm
+          const root = process.cwd();
+          const entries = fs.readdirSync(root, { withFileTypes: true });
+
+          const ignore = new Set([
+            'index.html',
+            'dashboard.html'
+          ]);
+
+          const apps = entries
+            .filter(e => e.isFile())
+            .map(e => e.name)
+            .filter(name => /\.html?$/i.test(name))
+            .filter(name => !ignore.has(name))
+            .filter(name => !/^dashboard\./i.test(name))
+            .sort((a,b) => a.localeCompare(b, 'id', { sensitivity:'base' }))
+            .map(file => ({ file }));
+
+          const out = {
+            version: 1,
+            generated_at: new Date().toISOString(),
+            apps
+          };
+
+          fs.writeFileSync(path.join(root, 'apps.json'), JSON.stringify(out, null, 2) + '\n', 'utf8');
+          console.log(`apps.json generated with ${apps.length} apps`);
+          NODE
+
+      - name: Commit & push if changed
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add apps.json
+          git commit -m "chore: auto-generate apps.json"
+          git push

@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "apps": [
+    { "file": "cuaca.html" },
+    { "file": "kalbmi.html" },
+    { "file": "keuangan.html" },
+    { "file": "paint.html" },
+    { "file": "todolist.html" },
+    { "file": "kalender.html" }
+  ]
+}
