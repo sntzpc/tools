@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Belajar Matematika – Lat_Math & Gasing</title>
+<link rel="icon" type="image/svg+xml"
+href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' rx='12' fill='%230b1220'/%3E%3Ctext x='8' y='52' font-size='50'%3E%F0%9F%8C%80%3C/text%3E%3C/svg%3E" />
+<style>
+    :root{
+    --bg: #0f172a;        --card:#111827;       --muted:#334155;    --ink:#e5e7eb;
+    --accent:#22c55e;     --accent-2:#06b6d4;   --warn:#f59e0b;     --danger:#ef4444;
+    --radius:16px;        --ring: rgba(14,165,233,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
+    background:linear-gradient(180deg, #0b1220, #0f172a 25%, #0b1220);
+    color:var(--ink);
+  }
+  .container{max-width:1060px; margin:0 auto; padding:16px}
+  header{display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap}
+  .brand{display:flex; align-items:center; gap:10px}
+  .logo{width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, var(--accent), var(--accent-2));
+        display:grid; place-items:center; font-weight:900; color:#052e16; box-shadow:0 6px 24px rgba(34,197,94,.35)}
+  .title{line-height:1.2}
+  .mode-switch{display:flex; gap:8px; flex-wrap:wrap}
+  .mode-btn{padding:10px 14px; border-radius:999px; border:1px solid #223; color:#cbd5e1; background:#0b1220; cursor:pointer}
+  .mode-btn.active{background:linear-gradient(135deg,#0ea5e9,#22c55e); color:#082f49; border-color:transparent; font-weight:800}
+
+  /* Kartu, grid & tombol umum */
+  .grid{display:grid; grid-template-columns:1.2fr 1fr; gap:16px}
+  @media (max-width: 960px){ .grid{grid-template-columns:1fr} }
+  .card{
+    background:linear-gradient(180deg, #0b1220, #0a0f1b);
+    border:1px solid #1f2937; border-radius:var(--radius); padding:16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  }
+  .card h3{margin:0 0 12px 0; font-size:1.05rem}
+  .row{display:flex; gap:12px; align-items:center; flex-wrap:wrap}
+  label{font-size:.9rem; color:#cbd5e1}
+  select, input[type="number"], input[type="text"]{
+    background:#0b1220; border:1px solid #223; color:#e5e7eb; border-radius:12px; padding:10px 12px; outline:none; min-width:80px;
+  }
+  .btn{border:none; border-radius:12px; padding:10px 14px; font-weight:700; cursor:pointer}
+  .btn-primary{background:linear-gradient(135deg, #22c55e, #06b6d4); color:#052e16}
+  .btn-ghost{background:#0b1220; color:#cbd5e1; border:1px solid #223}
+  .btn-warn{background:linear-gradient(135deg, #f59e0b, #ef4444); color:#3b0a0a}
+  .muted{color:#9aa7b2; font-size:.9rem}
+  .sep{height:1px;background:#1f2937;margin:12px 0}
+
+  /* ===== Lat_Math area (asli + tambahan DERET) ===== */
+  .list{display:grid; gap:8px; margin-top:10px}
+  .q{
+    background:#0b1220; border:1px dashed #264; border-radius:12px; padding:12px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .q .expr{font-variant-numeric:tabular-nums; font-size:1.05rem}
+  .q input{ width:110px; text-align:center; }
+  .pill{padding:6px 10px; border-radius:999px; border:1px solid #1f2937; background:#0b1220; font-variant-numeric:tabular-nums}
+  .ok{color:#86efac; border-color:#14532d}
+  .no{color:#fecaca; border-color:#7f1d1d}
+  .timer{font-weight:800; letter-spacing:.5px}
+
+  /* Deret (penjumlahan koran) 5 kolom */
+  .series-wrap{display:inline-block; border:1px dashed #223; border-radius:10px; padding:8px; background:#07101c}
+  .series-grid{display:grid; grid-template-columns: repeat(5, minmax(80px, 1fr)); gap:6px}
+  .series-cell{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:#0b1220; border:1px solid #1f2937; border-radius:8px; padding:6px 8px; text-align:right}
+  .series-total{margin-top:6px; font-size:.85rem; color:#9aa7b2}
+
+  /* ===== Gasing area (apel) ===== */
+  .grid-apple{
+    display:flex; flex-wrap:wrap; gap:8px; align-items:center; min-height:64px;
+    background:#0b1a2e; border:1px dashed #1f2a44; border-radius:14px; padding:12px;
+  }
+  .grid-apple .item{ width:42px; height:42px; display:grid; place-items:center; font-size:26px; filter: drop-shadow(0 6px 10px rgba(0,0,0,.35)); }
+  .kpi{ display:flex; gap:12px; flex-wrap:wrap }
+  .kpi .pill{ background:#0b1a2e; border:1px solid #1f2a44; padding:8px 10px; border-radius:999px; color:#9aa7b2 }
+
+  /* ===== Print 58mm ===== */
+  @media print{
+    @page { size: 58mm auto; margin: 3mm }
+    body{background:#fff; color:#000}
+    .container, header, .card{all:unset}
+    .ticket{ width:58mm; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:11pt; color:#000 }
+    .t-center{text-align:center}
+    .t-title{font-weight:800; font-size:12pt; margin-bottom:2mm}
+    .t-meta{font-size:9pt; margin-bottom:2mm}
+    .t-line{border-top:1px dashed #000; margin:2mm 0}
+    .t-q{display:flex; justify-content:space-between}
+    .t-q + .t-q{margin-top:1mm}
+    .no-print{display:none !important}
+  }
+</style>
+
+</head>
+<body>
+  <div class="container">
+    <header class="no-print">
+      <div class="brand">
+        <div class="logo">M</div>
+        <div class="title">
+          <b>Belajar Matematika</b><br><span class="muted">Lat_Math (operasi & deret) + Gasing (apel) • IndexedDB • Cetak 58mm</span>
+        </div>
+      </div>
+      <div class="mode-switch">
+        <button class="mode-btn active" data-mode="lat">Mode: Lat_Math</button>
+        <button class="mode-btn" data-mode="gasing">Mode: Gasing</button>
+      </div>
+    </header>
+
+    <!-- ========== MODE: LAT_MATH ========== -->
+    <section id="mode-lat" style="display:block">
+      <section class="grid">
+        <div class="card">
+          <h3>Pengaturan Soal</h3>
+          <div class="row">
+            <label for="level">Tingkat</label>
+            <select id="level">
+              <option value="pemula">Pemula</option>
+              <option value="ahli">Ahli</option>
+              <option value="mahir">Mahir</option>
+              <option value="legend">Legend</option>
+            </select>
+
+            <label for="perOp">Jumlah per operasi</label>
+            <input id="perOp" type="number" min="1" max="50" value="10" />
+          </div>
+          <div class="sep"></div>
+          <div>
+            <div class="muted">Pilih operasi</div>
+            <div class="check-wrap" id="ops"></div>
+            <div class="muted" style="margin-top:6px">Termasuk <b>Deret</b> 10 angka (tampil 5 kolom).</div>
+          </div>
+          <div class="sep"></div>
+          <div class="row">
+            <button id="btnGen" class="btn btn-primary">Generate Soal</button>
+            <button id="btnClear" class="btn btn-ghost">Bersihkan</button>
+          </div>
+          <div id="genInfo" class="muted" style="margin-top:8px;"></div>
+        </div>
+
+        <div class="card">
+          <h3>Latihan (Jawab di Sini)</h3>
+          <div class="row">
+            <span class="pill timer" id="timer">00:00</span>
+            <span class="pill">Level: <b id="curLevel">-</b></span>
+            <span class="pill">Soal: <b id="curCount">0</b></span>
+          </div>
+          <div id="qList" class="list" style="min-height:120px; margin-top:8px;"></div>
+          <div class="row" style="justify-content:space-between; margin-top:8px">
+            <div class="row">
+              <span class="pill ok">Benar: <b id="okCount">0</b></span>
+              <span class="pill no">Salah: <b id="noCount">0</b></span>
+            </div>
+            <div class="row">
+              <button id="btnCheck" class="btn btn-primary">Periksa Jawaban</button>
+              <button id="btnSave" class="btn btn-ghost" disabled>Simpan Hasil</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top:12px">
+        <h3>Cetak 58mm</h3>
+        <div class="row">
+          <label for="p-title">Judul</label>
+          <input id="p-title" type="text" placeholder="Latihan Matematika" value="Latihan Matematika"/>
+          <label for="p-name">Nama</label>
+          <input id="p-name" type="text" placeholder="(opsional)"/>
+          <button id="btnBuildTicket" class="btn btn-primary">Susun Halaman Cetak</button>
+          <button onclick="window.print()" class="btn btn-warn">Print sekarang</button>
+        </div>
+        <div id="printPreview" class="ticket" style="margin-top:12px;background:#fff;color:#000;padding:8px; border-radius:8px;"></div>
+        <div class="muted">Tips: di dialog print, pilih kertas <b>58mm</b>, nonaktifkan header/footer, margin <b>default/3mm</b>.</div>
+      </section>
+
+      <section class="card" style="margin-top:12px">
+        <h3>Statistik</h3>
+        <div class="row kpi">
+          <div class="pill">Total Sesi: <b id="k-sessions">0</b></div>
+          <div class="pill">Total Soal: <b id="k-questions">0</b></div>
+          <div class="pill">Akurasi: <b id="k-acc">0%</b></div>
+          <div class="pill">Rata2 Waktu: <b id="k-avgTime">0:00</b></div>
+        </div>
+        <div class="sep"></div>
+        <h4>Ringkasan per Operasi & Level</h4>
+        <div class="history">
+          <table id="tblBreak">
+            <thead><tr><th>Operasi</th><th>Level</th><th class="right">Benar</th><th class="right">Salah</th><th class="right">Akurasi</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="sep"></div>
+        <h4>Riwayat Sesi</h4>
+        <div class="history">
+          <table id="tblSessions">
+            <thead><tr><th>Tanggal</th><th>Level</th><th>Ops</th><th class="right">Soal</th><th class="right">Benar</th><th class="right">Salah</th><th class="right">Durasi</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="sep"></div>
+        <h4>Data & Utilitas</h4>
+        <div class="row">
+          <button id="btnExport" class="btn btn-ghost">Export JSON</button>
+          <input id="fileImport" type="file" accept="application/json" style="display:none" />
+          <button id="btnImport" class="btn btn-ghost">Import JSON</button>
+          <button id="btnWipe" class="btn btn-warn">Hapus Semua Data</button>
+        </div>
+        <div id="dataInfo" class="muted" style="margin-top:8px"></div>
+      </section>
+    </section>
+
+    <!-- ========== MODE: GASING (apel) ========== -->
+    <section id="mode-gasing" style="display:none">
+      <div class="row">
+        <div class="card" style="flex:1 1 620px">
+          <div class="card-body">
+            <div class="row">
+              <label>Mode:
+                <select id="g-mode">
+                  <option value="pair10">Pasangan → 10</option>
+                  <option value="combo">Kombinasi (A = B + ?)</option>
+                </select>
+              </label>
+              <button id="g-btn-new" class="btn btn-primary">Generate Soal</button>
+              <button id="g-btn-print-q" class="btn btn-ghost">Cetak Soal 58mm</button>
+              <button id="g-btn-print-s" class="btn btn-ghost">Cetak Statistik 58mm</button>
+              <button id="g-btn-reset" class="btn btn-warn">Reset Data</button>
+            </div>
+            <div id="g-play" style="margin-top:12px">
+              <div class="muted">Klik <b>Generate Soal</b> untuk memulai. Waktu akan berjalan otomatis.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="flex:1 1 380px">
+          <div class="card-body">
+            <h3 style="margin:0 0 8px 0;">Riwayat</h3>
+            <div style="max-height: 420px; overflow:auto">
+              <table id="g-table">
+                <thead><tr><th>#</th><th>Waktu</th><th>Mode</th><th>Soal</th><th>Jawab</th><th>Benar?</th><th>Durasi</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <div class="kpi" style="margin-top:10px">
+              <span class="pill">Benar: <b id="g-ok">0</b></span>
+              <span class="pill">Salah: <b id="g-no">0</b></span>
+              <span class="pill">Akurasi: <b id="g-acc">0%</b></span>
+              <span class="pill">⏱️ Rata2: <b id="g-avg">0.0s</b></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="print-root" style="display:none"></div>
+    </section>
+  </div>
+
+<script>
+    /* ===========================================================
+   MODE SWITCHER (Lat_Math vs Gasing)
+   =========================================================== */
+const modeBtns = document.querySelectorAll('.mode-btn');
+const modeLat  = document.getElementById('mode-lat');
+const modeGas  = document.getElementById('mode-gasing');
+modeBtns.forEach(b=>{
+  b.addEventListener('click', ()=>{
+    modeBtns.forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const m = b.dataset.mode;
+    modeLat.style.display = (m==='lat'?'block':'none');
+    modeGas.style.display = (m==='gasing'?'block':'none');
+  });
+});
+
+/* ===========================================================
+   ========== LAT_MATH (asli) + tambahan SOAL DERET ==========
+   =========================================================== */
+const DB_NAME = 'mathTrainer'; const DB_VER = 1; let DB = null;
+
+function idbOpen(){
+  return new Promise((resolve, reject)=>{
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = (ev)=>{
+      const db = ev.target.result;
+      if(!db.objectStoreNames.contains('sessions')){
+        db.createObjectStore('sessions', {keyPath:'id'});
+      }
+      if(!db.objectStoreNames.contains('recent')){
+        db.createObjectStore('recent', {keyPath:'key'}); // key = op|level
+      }
+    };
+    req.onsuccess = ()=>{ DB = req.result; resolve(DB); };
+    req.onerror = ()=>reject(req.error);
+  });
+}
+function idbGet(store, key){
+  return new Promise((resolve,reject)=>{
+    const tx = DB.transaction(store, 'readonly').objectStore(store).get(key);
+    tx.onsuccess = ()=>resolve(tx.result || null);
+    tx.onerror   = ()=>reject(tx.error);
+  });
+}
+function idbPut(store, value){
+  return new Promise((resolve,reject)=>{
+    const tx = DB.transaction(store, 'readwrite').objectStore(store).put(value);
+    tx.onsuccess = ()=>resolve(true);
+    tx.onerror   = ()=>reject(tx.error);
+  });
+}
+function idbDel(store, key){
+  return new Promise((resolve,reject)=>{
+    const tx = DB.transaction(store, 'readwrite').objectStore(store).delete(key);
+    tx.onsuccess = ()=>resolve(true);
+    tx.onerror   = ()=>reject(tx.error);
+  });
+}
+function idbAll(store){
+  return new Promise((resolve,reject)=>{
+    const results = [];
+    const tx = DB.transaction(store, 'readonly').objectStore(store).openCursor();
+    tx.onsuccess = (e)=>{
+      const cur = e.target.result;
+      if(cur){ results.push(cur.value); cur.continue(); } else resolve(results);
+    };
+    tx.onerror = ()=>reject(tx.error);
+  });
+}
+
+const OPS = [
+  {key:'add',  label:'Penjumlahan ( + )'},
+  {key:'sub',  label:'Pengurangan ( - )'},
+  {key:'mul',  label:'Perkalian ( × )'},
+  {key:'div',  label:'Pembagian ( : )'},
+  {key:'pow',  label:'Pangkat ( ^ )'},
+  {key:'sqrt', label:'Akar ( √ )'},
+  {key:'series', label:'Deret (penjumlahan koran)'} // ★ tambahan
+];
+const LEVELS = ['pemula','ahli','mahir','legend'];
+const RANGES = {
+  add:{ pemula:[1,20], ahli:[10,50], mahir:[25,100], legend:[50,300] },
+  sub:{ pemula:[1,20], ahli:[10,50], mahir:[25,100], legend:[50,300] },
+  mul:{ pemula:[1,10], ahli:[2,15],  mahir:[5,20],   legend:[10,30]  },
+  div:{ pemula:[1,10], ahli:[2,15],  mahir:[5,20],   legend:[10,30]  },
+  pow:{ pemula:[2,5],  ahli:[2,7],   mahir:[2,9],    legend:[2,12]   },
+  sqrt:{ pemula:[1,10], ahli:[1,15], mahir:[1,20],   legend:[1,25]   },
+  // Deret: kontrol digit
+  seriesDigits:{ pemula:1, ahli:2, mahir:3, legend:4 }
+};
+
+const RECENT_LIMIT = 200;
+const $ = (sel, root=document)=>root.querySelector(sel);
+const $$= (sel, root=document)=>Array.from(root.querySelectorAll(sel));
+
+const opsWrap = $('#ops'); const levelSel = $('#level'); const perOpEl  = $('#perOp');
+const btnGen   = $('#btnGen'); const btnClear = $('#btnClear'); const genInfo  = $('#genInfo');
+const qList    = $('#qList'); const curLevelEl = $('#curLevel'); const curCountEl = $('#curCount');
+const okCountEl  = $('#okCount'); const noCountEl  = $('#noCount');
+const btnCheck   = $('#btnCheck'); const btnSave    = $('#btnSave'); const timerEl    = $('#timer');
+const pTitle = $('#p-title'); const pName  = $('#p-name'); const btnBuildTicket = $('#btnBuildTicket'); const printPreview   = $('#printPreview');
+const kSessions = $('#k-sessions'); const kQuestions= $('#k-questions'); const kAcc = $('#k-acc'); const kAvgTime  = $('#k-avgTime');
+const tblBreak  = $('#tblBreak tbody'); const tblSessions = $('#tblSessions tbody');
+const btnExport = $('#btnExport'); const btnImport = $('#btnImport'); const fileImport= $('#fileImport'); const btnWipe   = $('#btnWipe'); const dataInfo  = $('#dataInfo');
+
+let CURRENT = { level:'pemula', items:[], startTs:0, endTs:0 };
+let TIMER_INT = null;
+
+function z(n){ return n<10 ? '0'+n : ''+n; }
+function fmtMS(ms){ const s = Math.floor(ms/1000); return `${Math.floor(s/60)}:${z(s%60)}`; }
+function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]];} return arr; }
+function nowISO(){ return new Date().toISOString(); }
+
+function genAdd(level){ const [lo,hi]=RANGES.add[level]; const a=randInt(lo,hi), b=randInt(lo,hi); return {text:`${a} + ${b}`, answer:a+b, a,b}; }
+function genSub(level){ const [lo,hi]=RANGES.sub[level]; let a=randInt(lo,hi), b=randInt(lo,hi); if(a<b){[a,b]=[b,a]} return {text:`${a} - ${b}`, answer:a-b, a,b}; }
+function genMul(level){ const [lo,hi]=RANGES.mul[level]; const a=randInt(lo,hi), b=randInt(lo,hi); return {text:`${a} × ${b}`, answer:a*b, a,b}; }
+function genDiv(level){ const [lo,hi]=RANGES.div[level]; const b=randInt(lo,hi), c=randInt(lo,hi); const a=b*c; return {text:`${a} : ${b}`, answer:c, a,b}; }
+function genPow(level){ const [lo,hi]=RANGES.pow[level]; const base=randInt(lo,hi); const exp=randInt(2, level==='legend'?4:3); return {text:`${base} ^ ${exp}`, answer: Math.pow(base, exp), a:base, b:exp}; }
+function genSqrt(level){ const [lo,hi]=RANGES.sqrt[level]; const root=randInt(lo,hi); const a=root*root; return {text:`√${a}`, answer: root, a, b:2}; }
+
+// ★ Generator DERET (10 angka, tampilan 5 kolom; digit per level)
+function genSeries(level){
+  const d = RANGES.seriesDigits[level] || 1;
+  const lo = (d===1)?0:Math.pow(10,d-1);
+  const hi = Math.pow(10,d)-1;
+  const arr = Array.from({length:10}, ()=> randInt(lo,hi));
+  const answer = arr.reduce((s,x)=>s+x,0);
+  // siapkan HTML 5 kolom (2 baris) ala "koran"
+  const cells = arr.map(n=>`<div class="series-cell">${n}</div>`).join('');
+  const html = `<div class="series-wrap"><div class="series-grid">${cells}</div><div class="series-total">Jumlahkan semua angka.</div></div>`;
+  return { text:`DERET (10 angka)`, answer, seriesArr: arr, html };
+}
+
+const GENERATORS = { add:genAdd, sub:genSub, mul:genMul, div:genDiv, pow:genPow, sqrt:genSqrt, series:genSeries };
+
+async function getRecent(op, level){ const rec = await idbGet('recent', `${op}|${level}`); return rec ? rec.items : []; }
+async function pushRecent(op, level, sig){
+  const key = `${op}|${level}`;
+  const rec = await idbGet('recent', key) || {key, items:[]};
+  rec.items.unshift(sig);
+  rec.items = rec.items.slice(0, RECENT_LIMIT);
+  await idbPut('recent', rec);
+}
+function signature(op, o){ return `${op}|${o.text}|${o.seriesArr?o.seriesArr.join(','):''}`; }
+
+function renderOps(){
+  opsWrap.innerHTML = '';
+  OPS.forEach(op=>{
+    const id = `op-${op.key}`;
+    const div = document.createElement('label');
+    div.className = 'chip';
+    div.innerHTML = `<input type="checkbox" id="${id}" value="${op.key}" checked /> ${op.label}`;
+    opsWrap.appendChild(div);
+  });
+}
+function selectedOps(){ return $$('#ops input[type=checkbox]').filter(i=>i.checked).map(i=>i.value); }
+
+async function generateQuestions(){
+  const level = levelSel.value;
+  const per   = Math.max(1, Math.min(50, parseInt(perOpEl.value||'10',10)));
+  const ops   = selectedOps();
+  if(ops.length===0){ genInfo.textContent = 'Pilih minimal satu operasi.'; return; }
+  btnGen.disabled = true; genInfo.textContent = 'Menyusun soal…';
+
+  const all = [];
+  for(const op of ops){
+    const gen = GENERATORS[op]; const needed = per; const recent = await getRecent(op, level);
+    const bag = new Set(recent);
+    let tries=0;
+    while(all.filter(x=>x.op===op).length < needed && tries<5000){
+      const o = gen(level); const sig = signature(op, o); tries++;
+      if(!bag.has(sig)){
+        all.push({ id:crypto.randomUUID(), op, level, ...o, userAns:'', correct:null });
+        bag.add(sig);
+      }
+    }
+    for(const item of all.filter(x=>x.op===op)){ await pushRecent(op, level, signature(op, item)); }
+  }
+  CURRENT = { level, items: shuffle(all), startTs: Date.now(), endTs:0 };
+  startTimer(); renderPractice();
+  genInfo.textContent = `Dibuat ${all.length} soal (${ops.length} operasi × ${per}).`;
+  btnGen.disabled = false;
+}
+
+function renderPractice(){
+  curLevelEl.textContent = CURRENT.level;
+  curCountEl.textContent = `${CURRENT.items.length}`;
+  qList.innerHTML = '';
+  CURRENT.items.forEach((q, idx)=>{
+    const row = document.createElement('div');
+    row.className = 'q';
+    const exprHTML = q.html ? q.html : `<div class="expr">${idx+1}. ${q.text} =</div>`;
+    row.innerHTML = `
+      <div class="expr" style="flex:1">${q.html ? `${idx+1}. ${q.text}<br>${q.html}` : `${idx+1}. ${q.text} =`}</div>
+      <input type="text" inputmode="numeric" pattern="[0-9-]*" data-id="${q.id}" placeholder="jawaban" />
+    `;
+    qList.appendChild(row);
+  });
+  okCountEl.textContent = '0'; noCountEl.textContent = '0'; btnSave.disabled = true;
+}
+function startTimer(){ if(TIMER_INT) clearInterval(TIMER_INT); TIMER_INT = setInterval(()=>{ const ms=(CURRENT.endTs||Date.now())-CURRENT.startTs; timerEl.textContent=fmtMS(ms); }, 250); }
+
+function checkAnswers(){
+  $$('#qList input').forEach(inp=>{
+    const id = inp.getAttribute('data-id');
+    const it = CURRENT.items.find(x=>x.id===id);
+    const val = (inp.value||'').trim();
+    const num = (val===''? NaN : Number(val));
+    it.userAns = val;
+    it.correct = (num === it.answer);
+    inp.style.borderColor = it.correct ? '#14532d' : '#7f1d1d';
+    inp.style.background  = it.correct ? 'rgba(20,83,45,.25)' : 'rgba(127,29,29,.2)';
+  });
+  const ok = CURRENT.items.filter(x=>x.correct===true).length;
+  const no = CURRENT.items.length - ok;
+  okCountEl.textContent = ok; noCountEl.textContent = no;
+  CURRENT.endTs = Date.now(); btnSave.disabled = false;
+}
+
+async function saveSession(){
+  const durMs = (CURRENT.endTs || Date.now()) - CURRENT.startTs;
+  const opsSet = Array.from(new Set(CURRENT.items.map(x=>x.op)));
+  const ok = CURRENT.items.filter(x=>x.correct===true).length;
+  const no = CURRENT.items.length - ok;
+  const rec = {
+    id: crypto.randomUUID(), at: nowISO(), level: CURRENT.level, ops: opsSet,
+    count: CURRENT.items.length, ok, no, durMs,
+    items: CURRENT.items.map(x=>({ op:x.op, text:x.text, answer:x.answer, userAns:x.userAns, correct:x.correct, series:x.seriesArr||null }))
+  };
+  await idbPut('sessions', rec);
+  btnSave.disabled = true;
+  alert('✅ Sesi tersimpan.');
+}
+
+function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c])); }
+function currentTicketLines(){
+  if(!CURRENT.items || CURRENT.items.length===0){ return ['(Belum ada soal—silakan generate dulu)']; }
+  const lines = [];
+  CURRENT.items.forEach((q, i)=>{
+    const num = (i+1).toString().padStart(2,' ');
+    if(q.op==='series'){
+      lines.push(`${num}. DERET (10): [${q.seriesArr.join(', ')}] = ____`);
+    }else{
+      const expr = q.text.replace('×','x').replace(' : ',': ');
+      lines.push(`${num}. ${expr} = ____`);
+    }
+  });
+  return lines;
+}
+function buildPrint(){
+  const title = (pTitle.value||'Latihan Matematika').trim();
+  const name  = (pName.value||'').trim();
+  const now = new Date();
+  const meta = `${now.toLocaleDateString('id-ID')} ${now.toLocaleTimeString('id-ID')}`;
+  const ops = Array.from(new Set(CURRENT.items.map(x=>x.op))).join(',');
+  const level = CURRENT.level || '-';
+  const lines = currentTicketLines();
+  printPreview.innerHTML = `
+    <div class="t-center">
+      <div class="t-title">${escapeHtml(title)}</div>
+      ${name ? `<div class="t-meta">Nama: ${escapeHtml(name)}</div>`:''}
+      <div class="t-meta">Level: ${level} • Ops: ${ops} • ${meta}</div>
+    </div>
+    <div class="t-line"></div>
+    ${lines.map(l=>`<div class="t-q"><span>${escapeHtml(l)}</span></div>`).join('')}
+    <div class="t-line"></div>
+    <div style="font-size:9pt" class="t-center">Selesai — semangat! </div>
+  `;
+}
+
+async function refreshStats(){
+  const sessions = await idbAll('sessions'); sessions.sort((a,b)=> (a.at<b.at?1:-1));
+  const totalSessions = sessions.length;
+  const totalQs = sessions.reduce((s,x)=>s+x.count,0);
+  const totalOk = sessions.reduce((s,x)=>s+x.ok,0);
+  const totalNo = sessions.reduce((s,x)=>s+x.no,0);
+  const totalDur= sessions.reduce((s,x)=>s+x.durMs,0);
+  const acc = totalQs? Math.round(100*totalOk/totalQs):0;
+  const avg = totalSessions? Math.round(totalDur/totalSessions):0;
+  kSessions.textContent = totalSessions; kQuestions.textContent= totalQs; kAcc.textContent = acc+'%'; kAvgTime.textContent = fmtMS(avg);
+
+  const map = {};
+  for(const s of sessions){
+    for(const it of s.items){
+      const key = `${it.op}|${s.level}`;
+      if(!map[key]) map[key]={ok:0,no:0};
+      if(it.correct) map[key].ok++; else map[key].no++;
+    }
+  }
+  tblBreak.innerHTML = '';
+  for(const key of Object.keys(map).sort()){
+    const [op, level] = key.split('|'); const d = map[key]; const total = d.ok + d.no;
+    const acc = total? Math.round(100*d.ok/total):0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${op}</td><td>${level}</td><td class="right">${d.ok}</td><td class="right">${d.no}</td><td class="right">${acc}%</td>`;
+    tblBreak.appendChild(tr);
+  }
+
+  tblSessions.innerHTML = '';
+  for(const s of sessions){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="nowrap">${new Date(s.at).toLocaleString('id-ID')}</td><td>${s.level}</td><td>${s.ops.join(',')}</td><td class="right">${s.count}</td>
+      <td class="right">${s.ok}</td><td class="right">${s.no}</td><td class="right">${fmtMS(s.durMs)}</td>`;tblSessions.appendChild(tr);}
+}
+
+document.getElementById('btnGen').addEventListener('click', generateQuestions);
+document.getElementById('btnClear').addEventListener('click', ()=>{
+  CURRENT = {level: levelSel.value, items:[], startTs:0, endTs:0};
+  qList.innerHTML=''; curLevelEl.textContent='-'; curCountEl.textContent='0';
+  okCountEl.textContent='0'; noCountEl.textContent='0'; timerEl.textContent='00:00';
+  if(TIMER_INT) clearInterval(TIMER_INT);
+});
+document.getElementById('btnCheck').addEventListener('click', checkAnswers);
+document.getElementById('btnSave').addEventListener('click', saveSession);
+document.getElementById('btnBuildTicket').addEventListener('click', buildPrint);
+document.getElementById('btnExport').addEventListener('click', exportJSON);
+document.getElementById('btnImport').addEventListener('click', ()=>fileImport.click());
+fileImport.addEventListener('change', ()=>{ if(fileImport.files && fileImport.files[0]) importJSON(fileImport.files[0]); });
+document.getElementById('btnWipe').addEventListener('click', wipeAll);
+
+async function exportJSON(){
+  const sessions = await idbAll('sessions'); const recent = await idbAll('recent');
+  const blob = new Blob([JSON.stringify({sessions, recent}, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob); const a=document.createElement('a');
+  a.href = url; a.download = `math-trainer-${new Date().toISOString().slice(0,19).replace(/[:T]/g,'-')}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  dataInfo.textContent = 'File JSON diekspor.';
+}
+async function importJSON(file){
+  const text = await file.text(); const obj = JSON.parse(text);
+  if(Array.isArray(obj.sessions)){
+    const existed = await idbAll('sessions'); for(const e of existed){ await idbDel('sessions', e.id); }
+    for(const s of obj.sessions){ await idbPut('sessions', s); }
+  }
+  if(Array.isArray(obj.recent)){
+    const existedR = await idbAll('recent'); for(const r of existedR){ await idbDel('recent', r.key); }
+    for(const r of obj.recent){ await idbPut('recent', r); }
+  }
+  dataInfo.textContent = 'Import selesai.'; await refreshStats();
+}
+async function wipeAll(){
+  if(!confirm('Hapus semua data lokal?')) return;
+  const sess = await idbAll('sessions'); for(const s of sess){ await idbDel('sessions', s.id); }
+  const recs = await idbAll('recent'); for(const r of recs){ await idbDel('recent', r.key); }
+  dataInfo.textContent = 'Semua data dihapus.'; await refreshStats();
+}
+
+/* Boot Lat_Math */
+(async function bootLat(){
+  await idbOpen(); renderOps();
+})();
+
+/* ===========================================================
+   ========== GASING (apel) – dipadatkan dari app aslimu ==========
+   =========================================================== */
+const appleSVG = encodeURIComponent(`<?xml version="1.0"?><svg xmlns='http://www.w3.org/2000/svg' width='42' height='42' viewBox='0 0 64 64'>
+  <defs><filter id='s' x='-50%' y='-50%' width='200%' height='200%'><feDropShadow dx='0' dy='3' stdDeviation='2' flood-opacity='.35'/></filter></defs>
+  <g filter='url(#s)'>
+    <path d='M40 6c-3 2-5 6-5 10 4 1 9-2 11-5 2-3 1-5-1-7-2 0-4 1-5 2z' fill='#15803d'/>
+    <path d='M21 20c-8 1-15 9-14 19 1 12 11 21 21 21 5 0 9-2 12-2 4 0 8 2 13 2 9 0 16-10 16-21 0-13-9-18-18-20-7-2-13 4-15 4-3 0-6-3-15-3z' transform='translate(-8,-4)' fill='#ef4444'/>
+    <circle cx='20' cy='18' r='3' fill='#fff' opacity='.25'/>
+  </g>
+</svg>`);
+const appleImg = () => `<img alt="apel" width="42" height="42" src="data:image/svg+xml,${appleSVG}">`;
+
+const GDB='apelquiz.db', GSTORE='results'; let gidb;
+function gidbOpen(){ return new Promise((res,rej)=>{ const r=indexedDB.open(GDB,1);
+  r.onupgradeneeded=e=>{ const db=e.target.result; if(!db.objectStoreNames.contains(GSTORE)){ const os=db.createObjectStore(GSTORE,{ keyPath:'id', autoIncrement:true }); os.createIndex('by_time','ts'); } };
+  r.onsuccess=()=>{gidb=r.result; res();}; r.onerror=()=>rej(r.error); }); }
+function gidbAdd(obj){ return new Promise((res,rej)=>{ const tx=gidb.transaction(GSTORE,'readwrite'); tx.objectStore(GSTORE).add(obj).onsuccess=()=>res(); tx.onerror=()=>rej(tx.error);});}
+function gidbAll(){ return new Promise((res,rej)=>{ const tx=gidb.transaction(GSTORE,'readonly'); const req=tx.objectStore(GSTORE).getAll(); req.onsuccess=()=>res(req.result||[]); req.onerror=()=>rej(req.error); });}
+function gidbClear(){ return new Promise((res,rej)=>{ const tx=gidb.transaction(GSTORE,'readwrite'); const req=tx.objectStore(GSTORE).clear(); req.onsuccess=()=>res(); req.onerror=()=>rej(req.error); }); }
+
+const gPlay = document.getElementById('g-play'); const gMode = document.getElementById('g-mode');
+const gTable = document.querySelector('#g-table tbody'); const gOk = document.getElementById('g-ok');
+const gNo = document.getElementById('g-no'); const gAcc = document.getElementById('g-acc'); const gAvg = document.getElementById('g-avg');
+document.getElementById('g-btn-new').onclick = gNew; document.getElementById('g-btn-reset').onclick = gReset;
+document.getElementById('g-btn-print-q').onclick = gPrintQ; document.getElementById('g-btn-print-s').onclick = gPrintS;
+
+const gState = { current:null, t0:0, raf:0 };
+function gGenPair10(){ const n = Math.floor(Math.random()*9)+1; return { type:'pair10', a:n, b:null, target:10, answer: 10-n }; }
+function gGenCombo(){ const A = Math.floor(Math.random()*7)+3; const B = Math.floor(Math.random()*(A+1)); return { type:'combo', a:A, b:B, target:A, answer: A - B }; }
+
+function gRender(s){
+  const block=(label,count)=>`<div><div class="muted" style="margin:4px 0 6px 4px">${label}: <b>${count}</b> buah</div><div class="grid-apple">${Array.from({length:count}).map(()=>`<div class="item">${appleImg()}</div>`).join('')}</div></div>`;
+  const blocks = s.type==='pair10' ? block('Jumlah Apel', s.a) : `${block('Target (A)', s.a)}${block('Saat ini (B)', s.b)}`;
+  gPlay.innerHTML = `
+    <div class="blocks">${blocks}</div>
+    <div class="row" style="margin-top:10px">
+      <div>Masukkan jawaban:</div>
+      <input id="g-inp" type="number" min="0" max="99" inputmode="numeric" />
+      <button id="g-submit" class="btn btn-primary">Kunci Jawaban</button>
+      <span class="muted">⏱️ <span id="g-timer">0.0s</span></span>
+      <span id="g-status" style="min-width:140px; font-weight:700"></span>
+    </div>
+  `;
+  document.getElementById('g-submit').onclick = gSubmit;
+  document.getElementById('g-inp').focus();
+}
+function gTick(){
+  const el=document.getElementById('g-timer'); if(!el) return;
+  const dt=(performance.now()-gState.t0)/1000; el.textContent=dt.toFixed(1)+'s';
+  gState.raf=requestAnimationFrame(gTick);
+}
+function gNew(){ gState.current = (gMode.value==='pair10')? gGenPair10(): gGenCombo(); gRender(gState.current); cancelAnimationFrame(gState.raf); gState.t0=performance.now(); gTick(); }
+async function gSubmit(){
+  const s=gState.current; if(!s) return;
+  const inp=document.getElementById('g-inp'); const val=Number(inp.value); cancelAnimationFrame(gState.raf);
+  const dur=((performance.now()-gState.t0)/1000); const ok=(val===s.answer);
+  const st=document.getElementById('g-status'); st.textContent = ok?'✔ Benar':`✖ Salah (jawaban: ${s.answer})`; st.style.color = ok?'#22c55e':'#ef4444';
+  await gidbAdd({ ts: Date.now(), type:s.type, a:s.a, b:s.b, target:s.target, expected:s.answer, user:isNaN(val)?null:val, ok, dur:Number(dur.toFixed(1)) });
+  await gLoad(); 
+}
+async function gLoad(){
+  const rows=await gidbAll(); rows.sort((x,y)=>y.ts-x.ts);
+  gTable.innerHTML = rows.map((r,i)=>{ const soal=r.type==='pair10'?`${r.a} → 10`:`${r.a} = ${r.b} + ?`; 
+    return `<tr><td>${rows.length-i}</td><td>${new Date(r.ts).toLocaleString('id-ID')}</td><td>${r.type==='pair10'?'Pasangan 10':'Kombinasi'}</td><td>${soal}</td><td>${r.user ?? '-'}</td><td>${r.ok?'✔':'✖'}</td><td>${r.dur.toFixed(1)}s</td></tr>`;
+  }).join('');
+  const total=rows.length, ok=rows.filter(r=>r.ok).length, no=total-ok, avg= total? (rows.reduce((a,r)=>a+r.dur,0)/total).toFixed(1):'0.0';
+  gOk.textContent=ok; gNo.textContent=no; gAcc.textContent= total? Math.round(ok/total*100)+'%':'0%'; gAvg.textContent=avg+'s';
+}
+async function gReset(){ if(!confirm('Hapus semua riwayat latihan (Gasing)?')) return; await gidbClear(); await gLoad(); alert('Data dihapus.'); }
+function gOpenPrint(inner){
+  const w=window.open('', '_blank', 'width=360,height=600');
+  w.document.write(`<html><head><title>Cetak</title><style>${document.querySelector('style').innerHTML}</style></head><body>${inner}</body></html>`);
+  w.document.close(); w.focus(); w.print();
+}
+function gPrintQ(){
+  const s=gState.current; if(!s){ alert('Belum ada soal. Klik Generate dulu.'); return; }
+  const soalText = s.type==='pair10' ? `Pasangan 10: ada ${s.a} apel, berapa lagi agar menjadi 10?` : `Kombinasi: A=${s.a}, B=${s.b}. Berapa ? agar A = B + ?`;
+  const html = `<div class="ticket"><div class="t-center"><div class="t-title">Soal Apel</div><div class="t-meta">${new Date().toLocaleString('id-ID')}</div></div><div class="t-line"></div><div><b>Mode:</b> ${s.type==='pair10'?'Pasangan 10':'Kombinasi'}</div><div style="margin:4px 0 6px 0">${soalText}</div><div class="t-line"></div><div>Jawaban: ________</div></div>`;
+  gOpenPrint(html);
+}
+async function gPrintS(){
+  const rows=await gidbAll(); const total=rows.length, ok=rows.filter(r=>r.ok).length, acc= total? Math.round(ok/total*100):0, avg= total? (rows.reduce((a,r)=>a+r.dur,0)/total).toFixed(1):'0.0'; 
+  const last=rows.slice(-10).reverse();
+  const html = `<div class="ticket"><div class="t-center"><div class="t-title">Statistik Gasing</div><div class="t-meta">${new Date().toLocaleString('id-ID')}</div></div><div class="t-line"></div>
+  <div>Total: ${total} • Benar: ${ok} • Akurasi: ${acc}% • Rata2: ${avg}s</div><div class="t-line"></div><div><b>10 Terakhir</b></div>
+  ${last.map((r,i)=>`<div class="t-q"><span>${i+1}. ${r.type==='pair10'?`P10 ${r.a}→10`:`K ${r.a}=${r.b}+?`}</span><span>${r.ok?'✔':'✖'} ${r.dur.toFixed(1)}s</span></div>`).join('')}</div>`;
+  gOpenPrint(html);
+}
+
+/* Boot Gasing */
+(async function bootGasing(){ await gidbOpen(); await gLoad(); })();
+</script>
+</body>
+</html>
