@@ -1,12 +1,12 @@
 /* Simple SW for offline caching of dashboard + bundled apps */
-const CACHE = 'app-dashboard-cache-v1';
+const CACHE = 'app-dashboard-cache-v2';
 const CORE = [
   './',
   './index.html',
   './dashboard.css',
   './dashboard.js',
   './manifest.webmanifest',
-  ["cuaca.html", "kalbmi.html", "keuangan.html", "paint.html", "todolist.html"]
+  ["cuaca.html", "kalbmi.html", "keuangan.html", "paint.html", "todolist.html", "kalender.html"]
 ];
 
 self.addEventListener('install', (e) => {
