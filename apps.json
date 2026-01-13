@@ -1,11 +1,24 @@
 {
   "version": 1,
+  "generated_at": "2026-01-13T03:25:48.533Z",
   "apps": [
-    { "file": "cuaca.html" },
-    { "file": "kalbmi.html" },
-    { "file": "keuangan.html" },
-    { "file": "paint.html" },
-    { "file": "todolist.html" },
-    { "file": "kalender.html" }
+    {
+      "file": "cuaca.html"
+    },
+    {
+      "file": "kalbmi.html"
+    },
+    {
+      "file": "kalender.html"
+    },
+    {
+      "file": "keuangan.html"
+    },
+    {
+      "file": "paint.html"
+    },
+    {
+      "file": "todolist.html"
+    }
   ]
 }
