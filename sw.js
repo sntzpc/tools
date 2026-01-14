@@ -1,5 +1,5 @@
 /* Simple SW for offline caching of dashboard + apps.json */
-const CACHE = 'app-dashboard-cache-v4';
+const CACHE = 'app-dashboard-cache-v5';
 const CORE = [
   './',
   './index.html',
